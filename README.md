@@ -1,0 +1,1 @@
+# SimuladorSistemaArquivo-TP2-SO
