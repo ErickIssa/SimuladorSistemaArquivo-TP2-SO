@@ -15,8 +15,8 @@ typedef struct {
     char *dados;
 } BlocoDados;
 
-void inicializaBloco(BlocoDados *bloco, int tamanhoBloco);
-void imprimeBloco(BlocoDados *bloco);
-void insereBloco(BlocoDados *bloco, char *dado);
+void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco);
+void imprimeBlocoDados(BlocoDados *bloco);
+void insereBlocoDados(BlocoDados *bloco, char *dado);
 
 #endif

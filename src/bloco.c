@@ -5,7 +5,7 @@
 #include "../include/bloco.h"
 
 
-void inicializaBloco(BlocoDados *bloco, int tamanhoBloco){
+void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
     bloco->usado = BLOCO_LIVRE;
     bloco->bytesUtilizados = 0;
 
@@ -15,7 +15,7 @@ void inicializaBloco(BlocoDados *bloco, int tamanhoBloco){
         printf("ERRO ALOCACAO BLOCO\n");
         return;
     }else{
-        for(int i = 0; i <= tamanhoBloco; i++){
+        for(int i = 0; i < tamanhoBloco; i++){
             bloco->dados[i] = '|';
         }
     }
@@ -23,7 +23,7 @@ void inicializaBloco(BlocoDados *bloco, int tamanhoBloco){
     return;
 }
 
-void insereBloco(BlocoDados *bloco, char *dado){
+void insereBlocoDados(BlocoDados *bloco, char *dado){
 
     //como vai ser dividido?
 
@@ -35,7 +35,7 @@ void insereBloco(BlocoDados *bloco, char *dado){
     return;
 }
 
-void imprimeBloco(BlocoDados *bloco) {
+void imprimeBlocoDados(BlocoDados *bloco) {
     if (bloco == NULL) {
         printf("Erro: Ponteiro de bloco invalido.\n");
         return;
