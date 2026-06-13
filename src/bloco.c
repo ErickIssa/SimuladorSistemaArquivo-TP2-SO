@@ -1,10 +1,11 @@
-#include "../include/bloco.h"
-
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "../include/bloco.h"
 
 
-void inicializaBloco(Bloco *bloco, int tamanhoBloco){
+void inicializaBloco(BlocoDados *bloco, int tamanhoBloco){
     bloco->usado = BLOCO_LIVRE;
     bloco->bytesUtilizados = 0;
 
@@ -22,13 +23,25 @@ void inicializaBloco(Bloco *bloco, int tamanhoBloco){
     return;
 }
 
-void imprimeBloco(Bloco *bloco) {
+void insereBloco(BlocoDados *bloco, char *dado){
+
+    //como vai ser dividido?
+
+    strcpy(bloco->dados,dado);
+    bloco->bytesUtilizados = strlen(dado);
+
+    bloco->usado = BLOCO_USADO;
+
+    return;
+}
+
+void imprimeBloco(BlocoDados *bloco) {
     if (bloco == NULL) {
         printf("Erro: Ponteiro de bloco invalido.\n");
         return;
     }
 
-    printf("--- Informacoes do Bloco ---\n");
+    printf("--- Informacoes do BlocoDados ---\n");
 
     if (bloco->usado == BLOCO_USADO) {
         printf("Status: USADO\n");

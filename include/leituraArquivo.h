@@ -14,8 +14,6 @@ typedef struct {
     int id;
     char nome[100];       // nome do arquivo, ex: "doc1.txt"
     char *conteudo;       // texto lido (título + resumo + palavras-chave)
-    float relevancia;
-    int n_termos;         // número de palavras distintas no texto (para TF-IDF)
 } Documento;
 
 void limparConteudo(char *entrada, char *saida);

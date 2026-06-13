@@ -21,24 +21,9 @@ int num_documentos = 0;
 
 int docs_lidos = 0;
 
-char *conectivos[] = {
-    "and", "or", "but", "if", "while", "with", "that", "because", "so", "when",
-    "although", "though", "unless", "until", "whereas", "since", "once", "to", 
-    "this", "these", "there", "the", NULL
-};
-
 char *letras_permitidas[] = {
     NULL
 };
-
-int ehConectivo(char *palavra) {
-    for (int i = 0; conectivos[i] != NULL; i++) {
-        if (strcmp(palavra, conectivos[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
 
 int ehLetraPermitida(char *palavra) {
     for (int i = 0; letras_permitidas[i] != NULL; i++) {
@@ -63,13 +48,12 @@ void limparConteudo(char *entrada, char *saida) {
         }
     }
     temporaria[j] = '\0';
-
-    // Etapa 2: remove conectivos e palavras de 1 letra (exceto permitidas)
+    
     char *token = strtok(temporaria, " ");
     j = 0;
     while (token != NULL) {
         int tamanho = strlen(token);
-        if (!ehConectivo(token) && (tamanho > 1 || ehLetraPermitida(token))) {
+        if ((tamanho > 0 || ehLetraPermitida(token))) {
             if (j > 0) saida[j++] = ' ';
             memcpy(&saida[j], token, tamanho);
             j += tamanho;
@@ -106,7 +90,7 @@ if (!fp) {
         // Atribui um ID para o documento
         documentos[docs_lidos].id = docs_lidos + 1;
 
-        char caminho_completo[100];
+        char caminho_completo[256];
         snprintf(caminho_completo, sizeof(caminho_completo), "./data/%s", documentos[docs_lidos].nome);
         FILE *doc = fopen(caminho_completo, "r");
         if (!doc) {
