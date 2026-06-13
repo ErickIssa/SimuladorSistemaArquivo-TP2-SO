@@ -1,11 +1,10 @@
-// Diretorio.c
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "Diretorio.h"
+#include "../include/Diretorio.h"
 
-void CriarDiretorio(Diretorio *d, char nome[64]){
-    strcpy(d->NomeDiretorio, nome);
+void CriarDiretorio(Diretorio *d){
     d->DFrente = (EntradaDiretorio*)malloc(sizeof(EntradaDiretorio));
     d->tam = 0;
     d->DTras = d->DFrente;
