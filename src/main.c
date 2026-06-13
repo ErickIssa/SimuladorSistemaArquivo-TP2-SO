@@ -7,13 +7,13 @@
 int main(){
 
     BlocoDados bloco;
-    inicializaBloco(&bloco, 10);
-    imprimeBloco(&bloco);
+    inicializaBlocoDados(&bloco, 10);
+    imprimeBlocoDados(&bloco);
     ler_arquivos("data.txt");
     imprimirDocumentos();
 
-    insereBloco(&bloco, documentos[1].conteudo);
-    imprimeBloco(&bloco);
+    insereBlocoDados(&bloco, documentos[1].conteudo);
+    imprimeBlocoDados(&bloco);
 
     return 0;
 }
