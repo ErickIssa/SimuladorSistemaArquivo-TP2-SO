@@ -36,6 +36,8 @@ endif
 # ==============================
 SRCS = \
 	$(SRC_DIR)/main.c \
+	$(SRC_DIR)/bloco.c \
+	$(SRC_DIR)/leituraArquivo.c
 
 	
 # ==============================
