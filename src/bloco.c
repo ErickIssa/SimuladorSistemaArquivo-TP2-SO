@@ -9,7 +9,7 @@ void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
     bloco->usado = BLOCO_LIVRE;
     bloco->bytesUtilizados = 0;
 
-    bloco->dados = (char*) malloc(sizeof(char) * tamanhoBloco);
+    bloco->dados = (char*) malloc(sizeof(char) * (tamanhoBloco + 1)); // + 1 pra por o \0
 
     if(bloco->dados == NULL){
         printf("ERRO ALOCACAO BLOCO\n");
@@ -18,6 +18,7 @@ void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
         for(int i = 0; i < tamanhoBloco; i++){
             bloco->dados[i] = '|';
         }
+        bloco->dados[tamanhoBloco] = '\0';
     }
     
     return;
@@ -28,7 +29,7 @@ void insereBlocoDados(BlocoDados *bloco, char *dado){
     //como vai ser dividido?
 
     strcpy(bloco->dados,dado);
-    bloco->bytesUtilizados = strlen(dado);
+    bloco->bytesUtilizados = strlen(dado) + 1; //caractere \0
 
     bloco->usado = BLOCO_USADO;
 
@@ -44,18 +45,39 @@ void imprimeBlocoDados(BlocoDados *bloco) {
     printf("--- Informacoes do BlocoDados ---\n");
 
     if (bloco->usado == BLOCO_USADO) {
-        printf("Status: USADO\n");
+        printf("Bloco esta ocupado.\n");
     } else {
-        printf("Status: LIVRE\n");
+        printf("Bloco esta livre.\n");
     }
 
     printf("Bytes utilizados: %d\n", bloco->bytesUtilizados);
 
-    if (bloco->dados != NULL) {
-        printf("Conteudo: %s\n", bloco->dados);
-    } else {
-        printf("Conteudo: Nao alocado.\n");
-    }
+    printf("Conteudo: ");
+    imprimeStringDebug(bloco->dados);
 
     printf("----------------------------\n");
+}
+
+char *toStringBlocoDados(BlocoDados *bloco, char separador) {
+
+    if (bloco == NULL){
+        return NULL;
+        printf("ERRO BLOCO NULL no toString\n");
+    }
+
+    //esse snprintf calcula calcula o tamanho quando é passado com esse null ai, usado so pro malloc
+    int tamanho = snprintf(NULL,0,"%d%c%d%c%s",bloco->usado,separador,
+    bloco->bytesUtilizados,separador,bloco->dados); 
+
+    char *resultado = malloc((tamanho + 1) * sizeof(char));
+
+    if (resultado == NULL){
+        printf("ERRO ALOCACAO STRING BLOCO\n");
+        return NULL;
+    }
+    //com a variavel resultado, é escrita a string formatada
+    sprintf(resultado,"%d%c%d%c%s",bloco->usado,separador,bloco->bytesUtilizados,separador,bloco->dados);
+    imprimeStringDebug(resultado);
+
+    return resultado;
 }

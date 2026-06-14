@@ -41,7 +41,7 @@ void limparConteudo(char *entrada, char *saida) {
     // Etapa 1: remove sinais e coloca em minúscula
     for (int i = 0; entrada[i] != '\0'; i++) {
         unsigned char c = (unsigned char) entrada[i];
-        if (c == '\n' || c == '\r' || c == '\t') {
+        if (c == '\r' || c == '\t') {
             temporaria[j++] = ' ';
         } else{
             temporaria[j++] = c;
@@ -169,4 +169,34 @@ void imprimirDocumentos() {
     }
 
     printf("Total de documentos: %d\n", num_documentos);
+}
+
+//debuf
+void imprimeStringDebug(char *str) {
+    if (str == NULL) {
+        printf("(NULL)\n");
+        return;
+    }
+
+    int i = 0;
+
+    while (1) {
+        if (str[i] == '\0') {
+            printf("\\0");
+            break;
+        }
+        else if (str[i] == '\n') {
+            printf("\\n");
+        }
+        else if (str[i] == '\t') {
+            printf("\\t");
+        }
+        else {
+            putchar(str[i]);
+        }
+
+        i++;
+    }
+
+    printf("\n");
 }
