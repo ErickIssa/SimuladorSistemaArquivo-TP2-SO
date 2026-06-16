@@ -1,11 +1,8 @@
 #include "bitMapInode.h"
-
 #include <stdio.h>
 
 
-
 void inicializarBitmapInodes(bitmapInode *bitmap) {
-    
     for (int i = 0; i < NUM_INODES; i++) {
         bitmap->bitmap[i] = 0;
     }
@@ -13,7 +10,6 @@ void inicializarBitmapInodes(bitmapInode *bitmap) {
 
 
 int marcarInodeOcupado(bitmapInode* bitmap, int idInode) {
-    
     if (!idInodeValido(idInode)) {
         return -1;
     }
@@ -23,7 +19,6 @@ int marcarInodeOcupado(bitmapInode* bitmap, int idInode) {
 }
 
 int marcarInodeLivre(bitmapInode *bitmap, int idInode) {
-    
     if (!idInodeValido(idInode)) {
         return -1;
     }
@@ -33,7 +28,6 @@ int marcarInodeLivre(bitmapInode *bitmap, int idInode) {
 }
 
 int buscarInodeLivre(bitmapInode *bitmap) {
-    
     for (int i = 0; i < NUM_INODES; i++) {
         if (bitmap->bitmap[i] == 0) {
             return i;
@@ -43,7 +37,7 @@ int buscarInodeLivre(bitmapInode *bitmap) {
 }
 
 int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]) {
-    
+
     int idLivre = buscarInodeLivre(bitmap);
 
     if (idLivre == -1) {
@@ -52,14 +46,14 @@ int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]) {
 
     marcarInodeOcupado(bitmap, idLivre);
 
-    preencherInode(&tabelaInodes[idLivre]);
+    preencherInode(&tabelaInodes[idLivre]); //id global de inodes
     tabelaInodes[idLivre].idInode = idLivre;
 
     return idLivre;
 }
 
 int desalocarInode(bitmapInode *bitmap, iNode tabelaInodes[], int idInode) {
-    
+
     if (!idInodeValido(idInode)) {
         return -1;
     }
