@@ -1,11 +1,14 @@
 #include "Inode.h"
+#include <stdlib.h>
+#include <string.h>
 
 void inicializarInode(iNode *inode, int id) {
     inode->idInode = id;
     inode->emUso = 0;
     inode->tamanhoArquivo = 0;
     inode->blocosOcupados = 0;
-
+    inode->tipo = 3;
+    inode->dir = NULL;
     inode->dataCriacao = 0;
     inode->dataModificacao = 0;
     inode->dataAcesso = 0;
@@ -17,9 +20,9 @@ void inicializarInode(iNode *inode, int id) {
 }
 
 
-void preencherInode(iNode *inode) {
+void preencherInode(iNode *inode, TipoInode tipopassado) {
     inode->emUso = 1;
-
+    inode->tipo=tipopassado;
     time_t instanteAtual = time(NULL);
 
     inode->dataCriacao = instanteAtual;
@@ -31,6 +34,18 @@ void preencherInode(iNode *inode) {
 
     for (int i = 0; i < NUM_BLOCOS; i++) {
         inode->blocos[i] = BLOCO_INVALIDO;
+    }
+
+    if(tipopassado==DIRETORIO)
+    {
+        inode->dir=
+            malloc(sizeof(Diretorio));
+
+        CriarDiretorio(inode->dir);
+    }
+    else
+    {
+        inode->dir=NULL;
     }
 
 }

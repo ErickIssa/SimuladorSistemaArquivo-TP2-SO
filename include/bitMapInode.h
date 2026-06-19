@@ -10,7 +10,7 @@ typedef struct{
 } bitmapInode;
 
 void inicializarBitmapInodes(bitmapInode *bitmap);
-
+int idInodeValido(int idInode);
 int marcarInodeOcupado(bitmapInode *bitmap, int idInode);
 int marcarInodeLivre(bitmapInode *bitmap, int idInode);
 

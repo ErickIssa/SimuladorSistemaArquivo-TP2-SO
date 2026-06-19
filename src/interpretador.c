@@ -13,8 +13,12 @@
 #define MAX_INPUT 256
 #define MAX_ARGS 10
 
+//criar um diretorio raiz Inicial automaticamente
+//Para isso criar um Inode passando TipoInode=DIRETORIO, que contenha o Inode 0
+//PreecherInode cria um diretorio já
+//venho do main ja sabendo que tenho um diretorio raiz(IDnode 0)
 
-void iniciarTerminal(Diretorio *dir_atual, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[]) {
+void iniciarInterpretador(Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[]) {
     char entrada[MAX_INPUT];
     char *args[MAX_ARGS];
 
@@ -55,57 +59,174 @@ void iniciarTerminal(Diretorio *dir_atual, Superbloco *sb, bitmapInode *bitmap, 
         } 
         
         else if (strcmp(comando, "mkdir") == 0 || strcmp(comando, "touch") == 0) {
+
             if (argc >= 2) {
-                char *nome = args[1];
-                
-                int id_inode = alocarInode(bitmap, tabelaInodes);
-                
-                if (id_inode != -1) {
-                    InserirEntrada(dir_atual, nome, id_inode);
-                    printf("entrada '%s' associada ao Inode [%d].\n", nome, id_inode);
-                    
-                    if(sb->inodes_livres > 0) sb->inodes_livres--; 
-                } else {
-                    printf("erro: sem inodes livres disponiveis no bitmap!\n");
+
+                char *caminho = args[1];
+
+                int inodePai = DiretorioCaminho(caminho,tabelaInodes);
+
+                if (inodePai == -1) {
+                    printf("Erro: caminho invalido!\n");
+                    continue;
                 }
+
+                char *nome = strrchr(caminho, '/');
+
+                if (nome == NULL)
+                    nome = caminho;
+                else
+                    nome++;
+
+                int novoInode = alocarInode(bitmap, tabelaInodes);
+
+                if (novoInode == -1) {
+                    printf("Erro: sem inodes livres!\n");
+                    continue;
+                }
+                //primeiro cria na tabela
+                if (strcmp(comando, "mkdir") == 0)
+                    preencherInode(&tabelaInodes[novoInode], DIRETORIO);
+
+                else
+                    preencherInode(&tabelaInodes[novoInode], ARQUIVO);
+                //depois adiciona no diretorio
+                InserirEntrada( tabelaInodes[inodePai].dir, nome,novoInode);
+
+                printf("'%s' criado com inode [%d]\n",nome,novoInode);
+
             } else {
-                printf("erro. uso: %s <nome>\n", comando);
+                printf("Erro. Uso: %s <caminho>\n", comando);
             }
-        } 
+        }
         
         else if (strcmp(comando, "ls") == 0) {
-            ListaConteudoDiretorio(dir_atual);
+
+            if (argc == 1) {
+                ListaConteudoDiretorio(tabelaInodes[0].dir);
+            } else {
+
+                int inode = DiretorioCaminho(args[1],tabelaInodes);
+
+                if (inode == -1) {
+                    printf("Diretorio nao encontrado!\n");
+                    continue;
+                }
+
+                ListaConteudoDiretorio(tabelaInodes[inode].dir);
+            }
         }
         
         else if (strcmp(comando, "rename") == 0) {
             if (argc >= 3) {
-                RenomearEntrada(dir_atual, args[1], args[2]);
+                char *caminho = args[1];
+                int inodePai = DiretorioCaminho(caminho,tabelaInodes);
+
+                if (inodePai == -1) {
+                    printf("Erro: caminho invalido!\n");
+                    continue;
+                }
+
+                char *nome = strrchr(caminho, '/');
+                if (nome == NULL)
+                    nome = caminho;
+                else
+                    nome++;
+                //printf("args[1]: %s\n",args[1]);
+                //printf("args[2]: %s\n",args[2]);
+                RenomearEntrada(tabelaInodes[inodePai].dir, nome, args[2]);
                 printf("comando de renomear executado.\n");
+
             } else {
                 printf("erro. uso: rename <nome_atual> <novo_nome>\n");
             }
         }
 
         else if (strcmp(comando, "rm") == 0) {
+
             if (argc >= 2) {
-                RemoverEntrada(dir_atual, args[1]);
+
+                char *caminho = args[1];
+
+                int inodePai = DiretorioCaminho(caminho,tabelaInodes);
+
+                if (inodePai == -1) {
+                    printf("Erro: caminho invalido!\n");
+                    continue;
+                }
+
+                char *nome = strrchr(caminho, '/');
+
+                if (nome == NULL)
+                    nome = caminho;
+                else
+                    nome++;
+
+                RemoverEntrada( tabelaInodes[inodePai].dir,nome);
 
             } else {
-                printf("erro. uso: rm <nome>\n");
+                printf("Erro. Uso: rm <caminho>\n");
             }
         }
 
-        else if (strcmp(comando, "import") == 0) {
+/*        else if (strcmp(comando, "import") == 0) {
             if (argc >= 2) {
                 ler_arquivos(args[1]);
                 imprimirDocumentos();
             } else {
                 printf("erro. uso: import <arquivo_de_texto.txt>\n");
             }
-        }
+        }*/
 
         else {
             printf("comando nao reconhecido: '%s'\n", comando);
         }
     }
+}
+//pecorre todo o caminho passado quebrando os / ate achar o IDInode do ultimo diretorio onde o arquivo esta
+int DiretorioCaminho(char *caminho, iNode tabelaInodes[])
+{
+    char copia[100];
+    strcpy(copia,caminho);
+
+    char *ultimo = strrchr(copia,'/');
+
+    // sem / → criar direto na raiz
+    if(ultimo==NULL)
+        return 0;
+
+    *ultimo='\0';
+
+    char *token=strtok(copia,"/");
+    int inodeAtual=0;
+
+    while(token!=NULL)
+    {
+        iNode *inode=&tabelaInodes[inodeAtual];
+
+        if(inode->tipo!=DIRETORIO)
+            return -1;
+
+        EntradaDiretorio *atual= inode->dir->DFrente->pProx;
+
+        while(atual!=NULL)
+        {
+            if(strcmp(atual->arq.Nome,token)==0)
+            {
+                inodeAtual=
+                    atual->arq.id_Inode;
+
+                break;
+            }
+
+            atual=atual->pProx;
+        }
+
+        if(atual==NULL)
+            return -1;
+
+        token=strtok(NULL,"/");
+    }
+
+    return inodeAtual;
 }

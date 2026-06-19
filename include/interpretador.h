@@ -6,6 +6,7 @@
 #include "bitMapInode.h"
 #include "Inode.h"
 
-void iniciarInterpretador(Diretorio *dir_atual, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[]);
+void iniciarInterpretador(Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[]);
+int DiretorioCaminho(char *caminho,iNode tabelaInodes[]);
 
 #endif
