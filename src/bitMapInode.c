@@ -8,6 +8,9 @@ void inicializarBitmapInodes(bitmapInode *bitmap) {
     }
 }
 
+int idInodeValido(int idInode){
+    return (idInode >= 0 && idInode < NUM_INODES);
+}
 
 int marcarInodeOcupado(bitmapInode* bitmap, int idInode) {
     if (!idInodeValido(idInode)) {
@@ -46,7 +49,7 @@ int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]) {
 
     marcarInodeOcupado(bitmap, idLivre);
 
-    preencherInode(&tabelaInodes[idLivre]); //id global de inodes
+    //preencherInode(&tabelaInodes[idLivre]); //id global de inodes
     tabelaInodes[idLivre].idInode = idLivre;
 
     return idLivre;

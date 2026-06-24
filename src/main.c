@@ -18,45 +18,58 @@
     //return 0;
 //}
 #include <stdio.h>
-#include <stdlib.h>
-// Se o main.c estiver na mesma pasta que o Diretorio.h, use a linha abaixo.
-// Caso o Diretorio.h esteja numa pasta "include", use #include "../include/Diretorio.h"
+
+#include "../include/Inode.h"
 #include "../include/Diretorio.h"
+#include "../include/bitMapInode.h"
+#include "../include/superbloco.h"
+#include "../include/interpretador.h"
 
-int main() {
-    // Declara a estrutura do diretório
-    Diretorio meu_diretorio;
+#define MAX_INODES 50
 
-    printf("--- 1. Criando o Diretorio ---\n");
-    // Agora a função apenas inicializa a lista encadeada
-    CriarDiretorio(&meu_diretorio);
-    printf("Diretorio inicializado com sucesso na memoria!\n\n");
+int main()
+{
+    Superbloco sb;
+    bitmapInode bitmap;
 
-    printf("--- 2. Inserindo Entradas ---\n");
-    // Simulando a inserção de dois arquivos e um subdiretório
-    InserirEntrada(&meu_diretorio, "texto.txt", 10);
-    InserirEntrada(&meu_diretorio, "codigo.c", 11);
-    InserirEntrada(&meu_diretorio, "pasta_fotos", 12);
+    iNode tabelaInodes[MAX_INODES];
 
-    // Lista para ver se inseriu corretamente
-    ListaConteudoDiretorio(&meu_diretorio);
-    printf("\n");
+    // Inicializa tabela de i-nodes
+    for(int i=0;i<MAX_INODES;i++)
+    {
+        inicializarInode(
+            &tabelaInodes[i],
+            i
+        );
+    }
 
-    printf("--- 3. Renomeando uma Entrada ---\n");
-    // Mudando o nome de codigo.c para main.c
-    RenomearEntrada(&meu_diretorio, "codigo.c", "main.c");
+    // Inicializa bitmap
+    inicializarBitmapInodes(
+        &bitmap
+    );
 
-    // Lista para confirmar a mudança
-    ListaConteudoDiretorio(&meu_diretorio);
-    printf("\n");
 
-    printf("--- 4. Removendo uma Entrada ---\n");
-    // Apagando o texto.txt
-    RemoverEntrada(&meu_diretorio, "texto.txt");
 
-    // Lista para ver o resultado final
-    ListaConteudoDiretorio(&meu_diretorio);
-    printf("\n");
+    // Cria diretório raiz
+    marcarInodeOcupado(
+        &bitmap,
+        0
+    );
+
+    preencherInode(
+        &tabelaInodes[0],
+        DIRETORIO
+    );
+
+    printf("Sistema iniciado!\n");
+    printf("Diretorio raiz criado no inode 0\n");
+
+    // Inicia terminal
+    iniciarInterpretador(
+        &sb,
+        &bitmap,
+        tabelaInodes
+    );
 
     return 0;
 }
