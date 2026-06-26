@@ -4,7 +4,9 @@
 #include <string.h>
 #include <math.h>
 
-int inicializaDisco(Disco * disco, Superbloco * superBloco){
+#define N_INODES 256
+ 
+int inicializaDisco(Disco * disco, Superbloco * superBloco, iNode * root){
 
     if(superBloco == NULL){
         return INFORMACOES_AUSENTES;
@@ -12,85 +14,66 @@ int inicializaDisco(Disco * disco, Superbloco * superBloco){
     if(!InformacoesSaoValidas(superBloco)){
         return INFORMACOES_INVALIDAS;
     }
-
-    disco->bitmap = (int*)malloc(sizeof(int)*superBloco->total_blocos);
-    if(disco->bitmap == NULL){
-        return ERRO_MEMORIA;
-    }
-
+    
     disco->tamanho_bloco = superBloco->tamanho_bloco;
     disco->total_blocos = superBloco->total_blocos;
 
-    FILE * arquivo;
-    arquivo = fopen("./data/arquivoDisco.txt", "w");
-
-    if (arquivo == NULL) {
-        return FALHA_AO_CRIAR_ARQUIVO;
-    }
-
-    for(int i = 0; i< disco->total_blocos; i++){
-        for(int j = 0; j < disco->tamanho_bloco;j++){
-            fprintf(arquivo, "_");
+    disco->bitmap = (int*)malloc(sizeof(int)*superBloco->total_blocos);
+    disco->blocos = (BlocoDados **)malloc(sizeof(BlocoDados)*disco->total_blocos);
+    
+    if(disco->bitmap == NULL){
+        return ERRO_MEMORIA;
+    }else{
+        for(int i = 0; i < disco->total_blocos; i++){
+            disco->bitmap[i] = 0;
+            inicializaBlocoDados(disco->blocos[i],disco->tamanho_bloco);
         }
-        fprintf(arquivo,"\n");
-        disco->bitmap[i] = 0;
     }
-    fclose(arquivo);
+
+    
+    disco->inodes = (iNode **)malloc(sizeof(iNode)*N_INODES);
+    disco->inodes[0] = root;
+
     return SUCESSO;
 }
 
-int escreveEmBloco(Disco * disco, int index, char * dados){
+int escreveArquivo(Disco * disco, char * texto, int id_inode){
 
-    if(index >= disco->total_blocos){
-        return INDICE_FORA_DO_INTERVALO;
-    }
+    int pos = 0;
+    for(int i = 0; i< disco->total_blocos; i++){
 
-    int nBlocosNecessarios = (strlen(dados) + disco->tamanho_bloco - 1) / disco->tamanho_bloco;
-    
-
-    if(index + nBlocosNecessarios > disco->total_blocos){
-        return ESPACO_INSUFICIENTE;
-    }
-
-    for(int i = index; i< index+nBlocosNecessarios; i++){
         if(disco->bitmap[i] == 1){
-            return ESPACO_INDISPONIVEL;
+            continue;
         }
-    }
-    for(int i = index; i< index+nBlocosNecessarios; i++){
+            
         disco->bitmap[i] = 1;
-    }
+        adicionarBloco(&disco->inodes[id_inode], i);
 
-    FILE * arquivo = fopen("./data/arquivoDisco.txt", "r+");
-    if (arquivo == NULL) {
-        return FALHA_AO_ABRIR_ARQUIVO;
-    }
+        int n = strlen(texto) - pos;
+        int acabou = 0;
+        if(n >= disco->tamanho_bloco){
 
-    long posicao = index * (disco->tamanho_bloco + 1);
-    fseek(arquivo, posicao, SEEK_SET);
-
-    int cont = 0;
-    for(size_t i = 0; i<strlen(dados); i++){
-        if(dados[i] == '\n'){
-
-            fprintf(arquivo,"#");
-
+            n = disco->tamanho_bloco - 1;
+            
         }else{
-
-            fprintf(arquivo,"%c", dados[i]);
-
+            acabou = 1;
         }
         
-        cont++;
-        if(cont == disco->tamanho_bloco){
-            fseek(arquivo, 1, SEEK_CUR);
-            cont = 0;
-        }
-    }
-    fclose(arquivo);
-    return SUCESSO;
-}
 
+        char textoBloco[disco->tamanho_bloco];
+        strncpy(textoBloco, texto + pos, n);
+        textoBloco[n] = '\0';
+        insereBlocoDados(&disco->blocos[i],textoBloco);
+        if(acabou){
+            return 1;
+            break;
+        }
+        pos += disco->tamanho_bloco -1;
+        
+
+    }
+    return 0;
+}
 
 int InformacoesSaoValidas(Superbloco * Superbloco){
     return (Superbloco->tamanho_bloco > 0)&&(Superbloco->total_blocos>0);

@@ -11,11 +11,6 @@ void inicializaSuperBloco(Superbloco * sb, int tamParticao, int tamBloco){
     sb->total_inodes = 100;
     sb->inodes_livres = sb->total_inodes;
 
-    //Definir como vai ser as localizacoes 
-    sb->inicio_bitmap_blocos = 1;
-    sb->inicio_bitmap_inodes = 2;
-    sb->inicio_tabela_inodes = 4;
-    sb->inicio_blocos_dados = 3;
 
     sb->inode_raiz = 0;
 }
