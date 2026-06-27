@@ -11,12 +11,8 @@ typedef struct{
 
 void inicializarBitmapInodes(bitmapInode *bitmap);
 int idInodeValido(int idInode);
-int marcarInodeOcupado(bitmapInode *bitmap, int idInode);
-int marcarInodeLivre(bitmapInode *bitmap, int idInode);
-
+int ocuparBitMap(bitmapInode *bitmap, int idInode);
+int desocuparBitMap(bitmapInode *bitmap, int idInode);
 int buscarInodeLivre(bitmapInode *bitmap);
-int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]);
-int desalocarInode(bitmapInode *bitmap, iNode tabelaInodes[], int idInode);
-
 
 #endif

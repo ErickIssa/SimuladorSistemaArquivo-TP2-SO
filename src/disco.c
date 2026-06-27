@@ -104,7 +104,7 @@ int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
     superBloco->blocos_livres += disco->inodes[id_inode]->blocosOcupados;
 
     for(int i = 0; i< disco->inodes[id_inode]->blocosOcupados; i++){
-        int index = disco->inodes[id_inode]->blocos[i];
+        int index = disco->inodes[id_inode]->blocosDiretos[i];
         disco->bitmap[index] = 0;
     }
 
@@ -124,7 +124,7 @@ char * retornaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
 
     for(int i = 0; i< disco->inodes[id_inode]->blocosOcupados; i++){
 
-        strcat(texto,retornaBloco(disco,disco->inodes[id_inode]->blocos[i]));
+        strcat(texto,retornaBloco(disco,disco->inodes[id_inode]->blocosDiretos[i]));
 
     }
 
