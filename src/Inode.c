@@ -5,19 +5,7 @@
 
 void inicializarInodeRaiz(iNode *inode, int id) {
     inicializarInode(inode, id);
-
-    inode->emUso = 1;
-    inode->tipo = DIRETORIO;
-
-    time_t instanteAtual = time(NULL);
-    inode->dataCriacao = instanteAtual;
-    inode->dataModificacao = instanteAtual;
-    inode->dataAcesso = instanteAtual;
-
-    inode->dir = malloc(sizeof(Diretorio));
-    if (inode->dir != NULL) {
-        CriarDiretorio(inode->dir);
-    }
+    preencherInode(inode, DIRETORIO);
 }
 
 void inicializarInode(iNode *inode, int id) {

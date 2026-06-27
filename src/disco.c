@@ -44,7 +44,7 @@ int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_
     liberarInode(disco->inodes[id_inode]);
     disco->bitmapInode.bitmap[id_inode] = 1;
     preencherInode(disco->inodes[id_inode], ARQUIVO);
-    incrementarTamanhoArquivo(disco->inodes[id_inode], strlen(texto));
+    alterarTamanhoArquivo(disco->inodes[id_inode], strlen(texto));
     superBloco->inodes_livres--;
 
 

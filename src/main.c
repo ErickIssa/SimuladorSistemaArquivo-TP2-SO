@@ -32,13 +32,7 @@ int main()
 {
     Superbloco sb;
     iNode raiz;
-    inicializarInode (&raiz, 0);
-
-
-    preencherInode(
-        &raiz,
-        DIRETORIO
-    );
+    inicializarInodeRaiz (&raiz, 0);
 
     printf("Sistema iniciado!\n");
 int tamParticao = 0;

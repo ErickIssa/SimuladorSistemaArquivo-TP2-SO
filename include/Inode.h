@@ -33,6 +33,7 @@ typedef struct iNode{
 } iNode;
 
 void inicializarInode(iNode *inode, int id);
+void inicializarInodeRaiz(iNode *inode, int id);
 void preencherInode(iNode *inode,TipoInode tipopassado);
 void liberarInode(iNode *inode);
 int adicionarBloco(iNode *inode, int enderecoBloco);
