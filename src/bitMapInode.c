@@ -39,7 +39,7 @@ int buscarInodeLivre(bitmapInode *bitmap) {
     return -1;
 }
 
-int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]) {
+int alocarInode(bitmapInode *bitmap, iNode* iNode,TipoInode tipo,int tamArquivo, int* endBlocosDiretos, int endIndireto) {
 
     int idLivre = buscarInodeLivre(bitmap);
 
@@ -49,26 +49,24 @@ int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]) {
 
     marcarInodeOcupado(bitmap, idLivre);
 
-    //preencherInode(&tabelaInodes[idLivre]); //id global de inodes
-    tabelaInodes[idLivre].idInode = idLivre;
+    preencherInode(iNode,tipo,tamArquivo,endBlocosDiretos,endIndireto);
 
     return idLivre;
 }
 
-int desalocarInode(bitmapInode *bitmap, iNode tabelaInodes[], int idInode) {
+int desalocarInode(bitmapInode *bitmap, iNode* iNode) {
 
-    if (!idInodeValido(idInode)) {
+    if (!idInodeValido(iNode->idInode)) {
         return -1;
     }
 
-    if (bitmap->bitmap[idInode] == 0) {
+    if (bitmap->bitmap[iNode->idInode] == 0) {
         return -1;
     }
 
-    marcarInodeLivre(bitmap, idInode);
+    marcarInodeLivre(bitmap, iNode->idInode);
 
-    liberarInode(&tabelaInodes[idInode]);
-    tabelaInodes[idInode].idInode = idInode;
+    liberarInode(iNode);
 
     return 0;
 }

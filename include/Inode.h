@@ -1,15 +1,19 @@
 #ifndef INODE_H
 #define INODE_H
 
-#define NUM_BLOCOS 15
+#define NUM_BLOCOS_DIRETOS 15
+#define NUM_BLOCOS_INDIRETOS 1
 #define BLOCO_INVALIDO -1
 
 #include <time.h>
-#include "Diretorio.h"
+#include "../include/Diretorio.h"
+
+
 
 typedef enum{
     ARQUIVO,
-    DIRETORIO
+    DIRETORIO,
+    INDEFINIDO = -1
 } TipoInode;
 
 typedef struct iNode{
@@ -25,11 +29,13 @@ typedef struct iNode{
     TipoInode tipo;
     Diretorio* dir; //usado somente caso for um diretorio
 
-    int blocos[NUM_BLOCOS];
+    int blocosDiretos[NUM_BLOCOS_DIRETOS];
+    int blocoIndireto;
+    
 } iNode;
 
 void inicializarInode(iNode *inode, int id);
-void preencherInode(iNode *inode,TipoInode tipopassado);
+void preencherInode(iNode *inode, TipoInode tipopassado, int tamanhoArquivo,int qtdBlocos, int* endBlocosDiretos, int endIndireto);
 void liberarInode(iNode *inode);
 int adicionarBloco(iNode *inode, int enderecoBloco);
 void incrementarTamanhoArquivo(iNode *inode, int bytesEscritos);

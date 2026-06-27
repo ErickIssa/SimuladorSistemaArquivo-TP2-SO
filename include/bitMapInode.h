@@ -15,8 +15,8 @@ int marcarInodeOcupado(bitmapInode *bitmap, int idInode);
 int marcarInodeLivre(bitmapInode *bitmap, int idInode);
 
 int buscarInodeLivre(bitmapInode *bitmap);
-int alocarInode(bitmapInode *bitmap, iNode tabelaInodes[]);
-int desalocarInode(bitmapInode *bitmap, iNode tabelaInodes[], int idInode);
+int alocarInode(bitmapInode *bitmap, iNode* iNode,TipoInode tipo,int tamArquivo, int* endBlocosDiretos, int endIndireto);
+int desalocarInode(bitmapInode *bitmap, iNode* iNode);
 
 
 #endif
