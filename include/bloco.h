@@ -4,13 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum usado {
-  BLOCO_LIVRE = 0,
-  BLOCO_USADO = 1,
-};
 
 typedef struct {
-    int usado;
     int bytesUtilizados;
     char *dados;
 } BlocoDados;
