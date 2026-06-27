@@ -2,6 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 
+void inicializarInodeRaiz(iNode *inode, int id) {
+    inicializarInode(inode, id);
+
+    inode->emUso = 1;
+    inode->tipo = DIRETORIO;
+
+    time_t instanteAtual = time(NULL);
+    inode->dataCriacao = instanteAtual;
+    inode->dataModificacao = instanteAtual;
+    inode->dataAcesso = instanteAtual;
+
+    inode->dir = malloc(sizeof(Diretorio));
+    if (inode->dir != NULL) {
+        CriarDiretorio(inode->dir);
+    }
+}
+
 void inicializarInode(iNode* inode, int id) {
 
     inode->idInode = id;
@@ -23,7 +40,6 @@ void inicializarInode(iNode* inode, int id) {
     inode->blocoIndireto = BLOCO_INVALIDO;
 
 }
-
 
 void preencherInode(iNode *inode, TipoInode tipopassado, int tamanhoArquivo,int qtdBlocos, int* endBlocosDiretos, int endIndireto) {
 
@@ -47,8 +63,11 @@ void preencherInode(iNode *inode, TipoInode tipopassado, int tamanhoArquivo,int 
         qtdDiretos = NUM_BLOCOS_DIRETOS;
     }
 
-    for (int i = 0; i < qtdDiretos; i++) {
-        inode->blocosDiretos[i] = endBlocosDiretos[i];
+    for (int i = 0; i < NUM_BLOCOS_DIRETOS; i++) {
+        if (i < qtdDiretos)
+            inode->blocosDiretos[i] = endBlocosDiretos[i];
+        else
+            inode->blocosDiretos[i] = BLOCO_INVALIDO;
     }
 
     inode->blocoIndireto = BLOCO_INVALIDO;
@@ -96,8 +115,6 @@ void liberarInode(iNode *inode) {
     inode->blocoIndireto = BLOCO_INVALIDO;
 }
 
-
-//verificar se tem blocos diretos livres, senao, usar bloco indireto (responsabilidade do disco??)
 int adicionarBloco(iNode *inode, int enderecoBloco) {
     if (inode->emUso == 0) {
         return 0;
@@ -113,8 +130,6 @@ int adicionarBloco(iNode *inode, int enderecoBloco) {
     inode->dataModificacao = time(NULL);
     inode->dataAcesso = time(NULL);
 
-    //uma funcao de disco que indique que o bloco esta ocupado
-
     return 1;
 }
 
@@ -128,3 +143,32 @@ void incrementarTamanhoArquivo(iNode *inode, int bytesEscritos) {
     inode->dataAcesso = time(NULL);
 }
 
+//verificar se tem blocos diretos livres, senao, usar bloco indireto (responsabilidade do disco??)
+void atualizarInode(iNode *inode, int novoTamanhoArquivo, int novaQtdBlocos, int *novosBlocosDiretos, int novoBlocoIndireto){
+    if (inode == NULL || inode->emUso == 0) {
+        return;
+    }
+
+    inode->tamanhoArquivo = novoTamanhoArquivo;
+    inode->blocosOcupados = novaQtdBlocos;
+
+    for (int i = 0; i < NUM_BLOCOS_DIRETOS; i++) {
+
+        if (i < novaQtdBlocos && i < NUM_BLOCOS_DIRETOS)
+            inode->blocosDiretos[i] = novosBlocosDiretos[i];
+        else
+            inode->blocosDiretos[i] = BLOCO_INVALIDO;
+    }
+
+    if (novaQtdBlocos > NUM_BLOCOS_DIRETOS)
+        inode->blocoIndireto = novoBlocoIndireto;
+    else
+        inode->blocoIndireto = BLOCO_INVALIDO;
+
+    inode->dataModificacao = time(NULL);
+    inode->dataAcesso = time(NULL);
+}
+
+void acessarInode(iNode *inode){
+    inode->dataAcesso = time(NULL);
+}

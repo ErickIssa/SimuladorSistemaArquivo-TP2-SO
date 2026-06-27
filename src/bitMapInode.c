@@ -39,7 +39,7 @@ int buscarInodeLivre(bitmapInode *bitmap) {
     return -1;
 }
 
-int alocarInode(bitmapInode *bitmap, iNode* iNode,TipoInode tipo,int tamArquivo, int qtdBlocos, int* endBlocosDiretos, int endIndireto) {
+int alocarInode(bitmapInode *bitmap, iNode** inodes,TipoInode tipo,int tamArquivo, int qtdBlocos, int* endBlocosDiretos, int endIndireto) {
 
     int idLivre = buscarInodeLivre(bitmap);
 
@@ -50,7 +50,7 @@ int alocarInode(bitmapInode *bitmap, iNode* iNode,TipoInode tipo,int tamArquivo,
 
     marcarInodeOcupado(bitmap, idLivre);
 
-    preencherInode(iNode,tipo,tamArquivo,qtdBlocos,endBlocosDiretos,endIndireto);
+    preencherInode(inodes[idLivre],tipo,tamArquivo,qtdBlocos,endBlocosDiretos,endIndireto);
 
     return idLivre;
 }

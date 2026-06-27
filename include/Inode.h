@@ -1,7 +1,7 @@
 #ifndef INODE_H
 #define INODE_H
 
-#define NUM_BLOCOS_DIRETOS 15
+#define NUM_BLOCOS_DIRETOS 10
 #define NUM_BLOCOS_INDIRETOS 1
 #define BLOCO_INVALIDO -1
 
@@ -39,5 +39,7 @@ void preencherInode(iNode *inode, TipoInode tipopassado, int tamanhoArquivo,int 
 void liberarInode(iNode *inode);
 int adicionarBloco(iNode *inode, int enderecoBloco);
 void incrementarTamanhoArquivo(iNode *inode, int bytesEscritos);
+void atualizarInode(iNode *inode, int novoTamanhoArquivo, int novaQtdBlocos, int *novosBlocosDiretos, int novoBlocoIndireto);
+void acessarInode(iNode *inode);
 
 #endif
