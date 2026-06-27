@@ -1,3 +1,5 @@
+
+//funções usadas no Tp de AEDS2 por:
 /* 
 Grupo: Os 01
 Matheus - 5909

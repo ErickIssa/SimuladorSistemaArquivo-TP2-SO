@@ -1,3 +1,4 @@
-2
+3
 arq4096.txt
 arq100.txt
+arqAseta1999.txt
