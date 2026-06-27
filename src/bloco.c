@@ -6,7 +6,7 @@
 
 
 void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
-    bloco->usado = BLOCO_LIVRE;
+
     bloco->bytesUtilizados = 0;
 
     bloco->dados = (char*) malloc(sizeof(char) * (tamanhoBloco+1));
@@ -26,12 +26,10 @@ void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
 
 void insereBlocoDados(BlocoDados *bloco, char *dado){
 
-    //como vai ser dividido?
 
-    strcpy(bloco->dados,dado);
+    strcpy(bloco->dados,dado);  
     bloco->bytesUtilizados = strlen(dado);
 
-    bloco->usado = BLOCO_USADO;
 
     return;
 }
@@ -44,11 +42,6 @@ void imprimeBlocoDados(BlocoDados *bloco) {
 
     printf("--- Informacoes do BlocoDados ---\n");
 
-    if (bloco->usado == BLOCO_USADO) {
-        printf("Status: USADO\n");
-    } else {
-        printf("Status: LIVRE\n");
-    }
 
     printf("Bytes utilizados: %d\n", bloco->bytesUtilizados);
 
