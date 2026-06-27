@@ -43,6 +43,7 @@ SRCS = \
 	$(SRC_DIR)/interpretador.c \
 	$(SRC_DIR)/leituraArquivo.c \
 	$(SRC_DIR)/superbloco.c \
+	$(SRC_DIR)/disco.c \
 	
 # ==============================
 # Objetos

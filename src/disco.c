@@ -31,7 +31,7 @@ int inicializaDisco(Disco * disco, Superbloco * superBloco, iNode * root){
 
     
     disco->inodes = (iNode **)malloc(sizeof(iNode)*N_INODES);
-    for(int i = 0; i < N_INODES; i++){
+    for(int i = 1; i < N_INODES; i++){
         inicializarInode(disco->inodes[i], i);
     }
     disco->inodes[0] = root;
