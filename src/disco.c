@@ -14,33 +14,52 @@ int inicializaDisco(Disco * disco, Superbloco * superBloco, iNode * root){
     if(!InformacoesSaoValidas(superBloco)){
         return INFORMACOES_INVALIDAS;
     }
-    
-    disco->tamanho_bloco = superBloco->tamanho_bloco;
-    disco->total_blocos = superBloco->total_blocos;
+
+    inicializarBitmapInodes(&disco->bitmapInode);
 
     disco->bitmap = (int*)malloc(sizeof(int)*superBloco->total_blocos);
-    disco->blocos = (BlocoDados **)malloc(sizeof(BlocoDados)*disco->total_blocos);
+    disco->blocos = (BlocoDados **)malloc(sizeof(BlocoDados)*superBloco->total_blocos);
     
     if(disco->bitmap == NULL){
         return ERRO_MEMORIA;
     }else{
-        for(int i = 0; i < disco->total_blocos; i++){
+        for(int i = 0; i < superBloco->total_blocos; i++){
             disco->bitmap[i] = 0;
-            inicializaBlocoDados(disco->blocos[i],disco->tamanho_bloco);
+            inicializaBlocoDados(disco->blocos[i], superBloco->tamanho_bloco);
         }
     }
 
     
     disco->inodes = (iNode **)malloc(sizeof(iNode)*N_INODES);
+    for(int i = 0; i < N_INODES; i++){
+        inicializarInode(disco->inodes[i], i);
+    }
     disco->inodes[0] = root;
 
     return SUCESSO;
 }
 
-int escreveArquivo(Disco * disco, char * texto, int id_inode){
+int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_inode){
+
+    liberarInode(disco->inodes[id_inode]);
+    disco->bitmapInode.bitmap[id_inode] = 1;
+    preencherInode(disco->inodes[id_inode], ARQUIVO);
+    incrementarTamanhoArquivo(disco->inodes[id_inode], strlen(texto));
+    superBloco->inodes_livres--;
+
+
+    int nBlocos = strlen(texto)/superBloco->tamanho_bloco;
+    if(strlen(texto)%superBloco->tamanho_bloco != 0){
+        nBlocos++;
+    }
+    if(nBlocos>superBloco->blocos_livres){
+        return ARQUIVO_NAO_CABE_NO_DISCO;
+    }else{
+        superBloco->blocos_livres -= nBlocos;
+    }
 
     int pos = 0;
-    for(int i = 0; i< disco->total_blocos; i++){
+    for(int i = 0; i< superBloco->total_blocos; i++){
 
         if(disco->bitmap[i] == 1){
             continue;
@@ -51,30 +70,70 @@ int escreveArquivo(Disco * disco, char * texto, int id_inode){
 
         int n = strlen(texto) - pos;
         int acabou = 0;
-        if(n >= disco->tamanho_bloco){
+        if(n >= superBloco->tamanho_bloco){
 
-            n = disco->tamanho_bloco - 1;
+            n = superBloco->tamanho_bloco - 1;
             
         }else{
             acabou = 1;
         }
         
 
-        char textoBloco[disco->tamanho_bloco];
+        char textoBloco[superBloco->tamanho_bloco];
         strncpy(textoBloco, texto + pos, n);
         textoBloco[n] = '\0';
         insereBlocoDados(&disco->blocos[i],textoBloco);
         if(acabou){
-            return 1;
+            return SUCESSO;
             break;
         }
-        pos += disco->tamanho_bloco -1;
+        pos += superBloco->tamanho_bloco -1;
         
 
     }
-    return 0;
+    return FALHOU;
 }
 
 int InformacoesSaoValidas(Superbloco * Superbloco){
     return (Superbloco->tamanho_bloco > 0)&&(Superbloco->total_blocos>0);
+}
+
+int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
+
+    superBloco->inodes_livres++;
+    superBloco->blocos_livres += disco->inodes[id_inode]->blocosOcupados;
+
+    for(int i = 0; i< disco->inodes[id_inode]->blocosOcupados; i++){
+        int index = disco->inodes[id_inode]->blocos[i];
+        disco->bitmap[index] = 0;
+    }
+
+
+    disco->bitmapInode.bitmap[id_inode] = 0;
+
+    return SUCESSO;
+
+}
+
+char * retornaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
+
+
+
+    char * texto;
+    texto = (char *)malloc(sizeof(char)*disco->inodes[id_inode]->blocosOcupados* superBloco->tamanho_bloco);
+
+    for(int i = 0; i< disco->inodes[id_inode]->blocosOcupados; i++){
+
+        strcat(texto,retornaBloco(disco,disco->inodes[id_inode]->blocos[i]));
+
+    }
+
+    return texto;
+
+}
+
+char * retornaBloco(Disco * disco, int id_bloco){
+
+    return disco->blocos[id_bloco];
+
 }
