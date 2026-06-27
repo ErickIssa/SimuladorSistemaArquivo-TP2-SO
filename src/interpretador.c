@@ -18,7 +18,7 @@
 //PreecherInode cria um diretorio já
 //venho do main ja sabendo que tenho um diretorio raiz(IDnode 0)
 
-void iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[]) {
+int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[]) {
     char *args[MAX_ARGS];
     int argc = 0;
 

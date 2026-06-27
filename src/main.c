@@ -62,14 +62,42 @@ int main()
     );
 
     printf("Sistema iniciado!\n");
+int tamParticao = 0;
+    do{
+        printf("Digite o tamanho total da particao etre 5000 a 10000 caracteres: ");
+        scanf("%d",&tamParticao);
+    }while(tamParticao < 5000 || tamParticao > 10000);
+
+    int tamBloco = 1;
+    do{
+        printf("Digite o tamanho do bloco (menor igual a %d escolhido): ", tamParticao);
+        scanf("%d",&tamBloco);
+    }while(tamBloco > tamParticao || tamBloco <= 0);
+
+    inicializaSuperBloco(&sb, tamParticao, tamBloco);
+
     printf("Diretorio raiz criado no inode 0\n");
 
-    // Inicia terminal
-    iniciarInterpretador(
-        &sb,
-        &bitmap,
-        tabelaInodes
-    );
+    printf("Os comandos para o sistema de arquivos sao: ");
+    printf("0 - Terminal\n1 - Arquivo\n");
 
+    int op = 0;
+    do{
+        printf("0 - Terminal\n1 - Arquivo\n");
+        scanf("%d",&op);
+    }while(op != 0 || op != 1);
+
+    if (op ==0 ){
+        char entrada [100]; 
+        while (1){
+            printf("[simulador@aseta]: ");
+            scanf("%s",&entrada);
+            if(iniciarInterpretador(entrada,&sb,&bitmap,tabelaInodes) == 0){
+                break;
+            }
+        }
+    }elif( op == 1){
+        
+    }
     return 0;
 }
