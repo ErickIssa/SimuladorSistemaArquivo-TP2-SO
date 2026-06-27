@@ -1,3 +1,5 @@
-2
-dados1.txt
-dados2.txt
+3
+arq10.txt
+arq100.txt
+arq4096.txt
+arqAseta1999.txt
