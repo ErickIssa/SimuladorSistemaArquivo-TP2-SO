@@ -170,3 +170,34 @@ void imprimirDocumentos() {
 
     printf("Total de documentos: %d\n", num_documentos);
 }
+
+void listarDocumentos() {
+
+    if( num_documentos == 0) {
+        printf("Nenhum documento carregado.\n");
+        return;
+    }else{
+        printf("\n===== LISTA DE DOCUMENTOS =====\n");
+            for (int i = 0; i < num_documentos; i++) {
+                printf("Documento %d: %s\n", documentos[i].id, documentos[i].nome);
+        }
+    }
+    return;
+}
+
+char* retornaDocumento(int id) {
+    for (int i = 0; i < num_documentos; i++) {
+        if (documentos[i].id == id) {
+            return documentos[i].conteudo;
+        }
+    }
+    printf("Documento com ID %d não encontrado.\n", id);
+    return NULL; // Retorna NULL se o documento não for encontrado
+}
+
+char* selecionaRetornaDocumento(){
+    int id;
+    printf("Digite o ID do documento que deseja acessar: ");
+    scanf("%d", &id);
+    return retornaDocumento(id);
+}
