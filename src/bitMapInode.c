@@ -39,17 +39,18 @@ int buscarInodeLivre(bitmapInode *bitmap) {
     return -1;
 }
 
-int alocarInode(bitmapInode *bitmap, iNode* iNode,TipoInode tipo,int tamArquivo, int* endBlocosDiretos, int endIndireto) {
+int alocarInode(bitmapInode *bitmap, iNode* iNode,TipoInode tipo,int tamArquivo, int qtdBlocos, int* endBlocosDiretos, int endIndireto) {
 
     int idLivre = buscarInodeLivre(bitmap);
 
     if (idLivre == -1) {
+        printf("Não há inode disponivel");
         return -1;
     }
 
     marcarInodeOcupado(bitmap, idLivre);
 
-    preencherInode(iNode,tipo,tamArquivo,endBlocosDiretos,endIndireto);
+    preencherInode(iNode,tipo,tamArquivo,qtdBlocos,endBlocosDiretos,endIndireto);
 
     return idLivre;
 }

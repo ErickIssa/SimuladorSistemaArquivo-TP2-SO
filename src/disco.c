@@ -66,7 +66,7 @@ int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_
         }
             
         disco->bitmap[i] = 1;
-        adicionarBloco(&disco->inodes[id_inode], i);
+        adicionarBloco(disco->inodes[id_inode], i);
 
         int n = strlen(texto) - pos;
         int acabou = 0;
@@ -82,7 +82,7 @@ int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_
         char textoBloco[superBloco->tamanho_bloco];
         strncpy(textoBloco, texto + pos, n);
         textoBloco[n] = '\0';
-        insereBlocoDados(&disco->blocos[i],textoBloco);
+        insereBlocoDados(disco->blocos[i],textoBloco);
         if(acabou){
             return SUCESSO;
             break;
@@ -134,6 +134,24 @@ char * retornaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
 
 char * retornaBloco(Disco * disco, int id_bloco){
 
-    return disco->blocos[id_bloco];
+    return disco->blocos[id_bloco]->dados;
 
+}
+int escreveBlocoEnderecoIndireto(Disco* disco, Superbloco superBloco, char * texto, int * id){
+    if(superBloco.blocos_livres <= 0){
+        return DISCO_LOTADO;
+    }
+    if((int)strlen(texto)> superBloco.tamanho_bloco){
+        return TEXTO_NAO_CABE_NO_BLOCO;
+    }
+    for(int i = 0; i< superBloco.total_blocos;i++){
+        if(disco->bitmap[i] == 1){
+            continue;
+        }
+        disco->bitmap[i] = 1;
+        insereBlocoDados(disco->blocos[i],texto);
+        *id = i;
+        return SUCESSO;
+    }
+    return FALHOU;
 }

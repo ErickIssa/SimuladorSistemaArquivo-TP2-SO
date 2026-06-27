@@ -13,6 +13,8 @@
 #define INFORMACOES_INVALIDAS 103
 #define ERRO_MEMORIA 104
 #define ARQUIVO_NAO_CABE_NO_DISCO 105
+#define DISCO_LOTADO 106
+#define TEXTO_NAO_CABE_NO_BLOCO 107
 
 
 typedef struct disco
@@ -31,6 +33,7 @@ int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_
 int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode);
 char * retornaArquivo(Disco * disco, Superbloco * superBloco, int id_inode);
 char * retornaBloco(Disco * disco, int id_bloco);
+int escreveBlocoEnderecoIndireto(Disco* disco, Superbloco superBloco, char * texto, int * id);
 
 
 
