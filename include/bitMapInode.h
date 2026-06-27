@@ -1,7 +1,7 @@
 #ifndef BITMAP_INODE_H
 #define BITMAP_INODE_H
 
-#define NUM_INODES 128
+#define NUM_INODES 256
 
 #include "Inode.h"
 

@@ -37,8 +37,13 @@ endif
 SRCS = \
 	$(SRC_DIR)/main.c \
 	$(SRC_DIR)/bloco.c \
-	$(SRC_DIR)/leituraArquivo.c
-
+	$(SRC_DIR)/bitMapInode.c \
+	$(SRC_DIR)/Diretorio.c \
+	$(SRC_DIR)/Inode.c \
+	$(SRC_DIR)/interpretador.c \
+	$(SRC_DIR)/leituraArquivo.c \
+	$(SRC_DIR)/superbloco.c \
+	$(SRC_DIR)/disco.c \
 	
 # ==============================
 # Objetos
