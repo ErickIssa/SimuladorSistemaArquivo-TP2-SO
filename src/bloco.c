@@ -9,7 +9,7 @@ void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
 
     bloco->bytesUtilizados = 0;
 
-    bloco->dados = (char*) malloc(sizeof(char) * tamanhoBloco);
+    bloco->dados = (char*) malloc(sizeof(char) * (tamanhoBloco+1));
 
     if(bloco->dados == NULL){
         printf("ERRO ALOCACAO BLOCO\n");

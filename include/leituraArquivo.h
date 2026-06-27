@@ -19,6 +19,8 @@ typedef struct {
 void limparConteudo(char *entrada, char *saida);
 void ler_arquivos(char *arquivo_entrada);
 void imprimirDocumentos();
+void listarDocumentos();
+char* retornaDocumento(int id);
 
 // Acesso a  documentos e num_documentos em outros arquivos
 extern Documento documentos[MAX_DOCS];
