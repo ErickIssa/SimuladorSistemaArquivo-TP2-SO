@@ -1,0 +1,6 @@
+5
+mkdir teste
+touch /teste/arquivo.txt
+ls
+touch arq2.txt
+ls /teste

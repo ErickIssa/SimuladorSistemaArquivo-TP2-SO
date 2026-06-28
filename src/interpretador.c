@@ -149,6 +149,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
                 int novoInode = buscarInodeLivre(&disco->bitmapInode);
                 if (novoInode != -1) {
                     ocuparBitMap(&disco->bitmapInode, novoInode);
+                    sb->inodes_livres--;
                 }
                 if (novoInode == -1) {
                     printf("Erro: sem inodes livres!\n");
@@ -251,6 +252,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
                 printf("'%s' removido com sucesso.\n", nome);
                 desocuparBitMap(&disco->bitmapInode, idAlvo);
                 liberarInode(disco->inodes[idAlvo]);
+                sb->inodes_livres++;
             }
         } else {
             printf("Erro. Uso: rm [-r] <caminho>\n");

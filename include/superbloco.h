@@ -16,4 +16,5 @@ typedef struct {
 } Superbloco;
 
 void inicializaSuperBloco(Superbloco * sb, int tamParticao, int tamBloco);
+void imprimirSuperBloco(const Superbloco *sb);
 #endif

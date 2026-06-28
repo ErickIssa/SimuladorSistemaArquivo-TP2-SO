@@ -49,6 +49,7 @@ int inicializaDisco(Disco *disco, Superbloco *superBloco) {
     // Inicializa o inode raiz
     inicializarInodeRaiz(disco->inodes[0], 0);
     ocuparBitMap(&disco->bitmapInode, 0);
+    superBloco->inodes_livres--;
 
     // Demais inodes
     for (int i = 1; i < N_INODES; i++) {

@@ -55,8 +55,7 @@ int tamParticao = 0;
     printf("Particao criada com sucesso! UHUL\n");
 
 
-    printf("Os comandos para o sistema de arquivos sao: ");
-    printf("0 - Terminal\n1 - Arquivo\n");
+    printf("Os comandos para o sistema de arquivos sao: \n");
 
     int op = 0;
     do{
@@ -72,8 +71,9 @@ int tamParticao = 0;
             if(iniciarInterpretador(entrada,&sb,&disco) == 0){
                 break;
             }
-            //imprimirBitmapInodes(&disco.bitmapInode);
-            //imprimirTodosInodes(disco.inodes);
+            imprimirSuperBloco(&sb);
+            imprimirTodosInodes(disco.inodes);
+
         }
     }else if(op == 1){
         lerComandosArquivo("in/comandos.txt", &sb, &disco);
