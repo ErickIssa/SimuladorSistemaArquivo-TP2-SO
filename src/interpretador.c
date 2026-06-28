@@ -275,8 +275,8 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
         }
     }else
     if(strcmp(comando, "escreva")==0){
-        //char *texto = selecionaRetornaDocumento();
-        //Terminar depois ...
+        char *texto = selecionaRetornaDocumento();
+        printf("Escrevendo documento selecionado: '%s'\n", texto);
     }
     else {
         printf("comando nao reconhecido: '%s'\n", comando);

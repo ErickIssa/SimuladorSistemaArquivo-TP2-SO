@@ -199,6 +199,7 @@ char* retornaDocumento(int id) {
 
 char* selecionaRetornaDocumento(){
     int id;
+    listarDocumentos();
     printf("Digite o ID do documento que deseja acessar: ");
     scanf("%d", &id);
     return retornaDocumento(id);

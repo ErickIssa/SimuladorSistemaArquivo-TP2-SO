@@ -21,7 +21,7 @@ void ler_arquivos(char *arquivo_entrada);
 void imprimirDocumentos();
 void listarDocumentos();
 char* retornaDocumento(int id);
-
+char* selecionaRetornaDocumento();
 // Acesso a  documentos e num_documentos em outros arquivos
 extern Documento documentos[MAX_DOCS];
 extern int num_documentos;

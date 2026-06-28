@@ -25,13 +25,14 @@
 #include "../include/superbloco.h"
 #include "../include/interpretador.h"
 #include "../include/disco.h"
+#include "../include/leituraArquivo.h"
 
 #define MAX_INODES 50
 
 int main()
 {
     Superbloco sb;    
-
+    ler_arquivos("data/data.txt");
     printf("Sistema iniciado!\n");
 int tamParticao = 0;
     do{
