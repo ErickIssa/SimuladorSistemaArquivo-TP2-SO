@@ -3,8 +3,33 @@
 #include <string.h>
 
 #include "../include/bloco.h"
+#include "../include/Inode.h"
 
+void imprimirConteudoArquivo(iNode *inode, BlocoDados *disco) {
+    if (inode == NULL || disco == NULL) {
+        printf("Erro interno: i-node ou disco invalido.\n");
+        return;
+    }
 
+    if (inode->blocosOcupados == 0 || inode->tamanhoArquivo == 0) {
+        printf("O arquivo esta vazio.\n");
+        return;
+    }
+
+    // Percorre os blocos que pertencem a este i-node
+    for (int i = 0; i < inode->blocosOcupados; i++) {
+        
+        int enderecoBloco = inode->blocosDiretos[i]; 
+        if (enderecoBloco != BLOCO_INVALIDO) { 
+            // Imprime exatamente a quantidade de bytes utilizados naquele bloco
+            printf("%.*s", disco[enderecoBloco].bytesUtilizados, disco[enderecoBloco].dados);
+        }
+    }
+    printf("\n"); // Quebra de linha ao final da leitura
+
+    // Atualiza a data de acesso do i-node
+    inode->dataAcesso = time(NULL);
+}
 void inicializaBlocoDados(BlocoDados *bloco, int tamanhoBloco){
 
     bloco->bytesUtilizados = 0;

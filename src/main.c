@@ -63,19 +63,20 @@ int tamParticao = 0;
     do{
         printf("0 - Terminal\n1 - Arquivo\n");
         scanf("%d",&op);
-    }while(op != 0 || op != 1);
+    }while(op != 0 && op != 1);
 
     if (op ==0 ){
         char entrada [100]; 
         while (1){
             printf("[simulador@aseta]: ");
             fgets(entrada, 100, stdin);
-            if(iniciarInterpretador(entrada,&sb,&(disco.bitmapInode),*disco.inodes) == 0){
+            if(iniciarInterpretador(entrada,&sb,&(disco.bitmapInode),*disco.inodes, *disco.blocos) == 0){
                 break;
             }
         }
     }else if(op == 1){
-        printf("ELAO");
+        lerComandosArquivo("in/comandos.txt", &sb, &(disco.bitmapInode), *disco.inodes, *disco.blocos);
+        //printf("ELAO");
     }
     return 0;
 }
