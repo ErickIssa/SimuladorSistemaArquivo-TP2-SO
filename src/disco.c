@@ -135,7 +135,9 @@ int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
 
 char * retornaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
 
-
+    if(disco->inodes[id_inode]->blocosOcupados == 0){
+        return "Arquivo Vazio!!!\n";
+    }
 
     char * texto;
     texto = (char *)malloc(sizeof(char)*disco->inodes[id_inode]->blocosOcupados* superBloco->tamanho_bloco);

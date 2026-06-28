@@ -69,14 +69,14 @@ int tamParticao = 0;
         while (1){
             printf("[simulador@aseta]: ");
             fgets(entrada, 100, stdin);
-            if(iniciarInterpretador(entrada,&sb,&(disco.bitmapInode),disco.inodes, disco.blocos) == 0){
+            if(iniciarInterpretador(entrada,&sb,&disco) == 0){
                 break;
             }
             //imprimirBitmapInodes(&disco.bitmapInode);
             //imprimirTodosInodes(disco.inodes);
         }
     }else if(op == 1){
-        lerComandosArquivo("in/comandos.txt", &sb, &(disco.bitmapInode), disco.inodes, disco.blocos);
+        lerComandosArquivo("in/comandos.txt", &sb, &disco);
         //printf("ELAO");
     }
     return 0;

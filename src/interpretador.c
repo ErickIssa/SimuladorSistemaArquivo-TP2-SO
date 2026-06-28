@@ -9,6 +9,7 @@
 #include "../include/Inode.h"
 #include "../include/leituraArquivo.h"
 #include "../include/bloco.h"
+#include "../include/disco.h"
 
 #define MAX_INPUT 256
 #define MAX_ARGS 10
@@ -19,7 +20,7 @@ static int inodeCWD = 0;
 //Para isso criar um Inode passando TipoInode=DIRETORIO, que contenha o Inode 0
 //PreecherInode cria um diretorio já
 //venho do main ja sabendo que tenho um diretorio raiz(IDnode 0)
-void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco) {
+void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb,Disco *disco) {
     FILE *arquivo = fopen(caminhoArquivo, "r");
     
     if (arquivo == NULL) {
@@ -60,7 +61,7 @@ void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode 
         printf("\n[Lote] %s\n", linha); // modo verboso(comentar caso queira apenas o resultado final)
 
         // envia a string formatada para o interpretador principal
-        if (iniciarInterpretador(linha, sb, bitmap, tabelaInodes, disco) == 0) {
+        if (iniciarInterpretador(linha, sb,disco) == 0) {
             // se o interpretador retornar 0 (encontrou um exit/quit), paramos a leitura do arquivo
             break; 
         }
@@ -84,7 +85,7 @@ int BuscarInodePorNome(Diretorio *d, char *nome) {
     return -1; // Não encontrou
 }
 
-int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco) {
+int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
     char *args[MAX_ARGS];
     int argc = 0;
 
@@ -123,7 +124,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     else if (strcmp(comando, "mkdir") == 0 || strcmp(comando, "touch") == 0) {
         if (argc >= 2) {
             char *caminho = args[1];
-            int inodePai = DiretorioCaminho(caminho, tabelaInodes);
+            int inodePai = DiretorioCaminho(caminho, disco->inodes);
 
             if (inodePai == -1) {
                 printf("erro: caminho invalido!\n");
@@ -133,21 +134,21 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             char *nome = strrchr(caminho, '/');
             if (nome == NULL) nome = caminho; else nome++;
 
-            int idExistente = BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome);
+            int idExistente = BuscarInodePorNome(disco->inodes[inodePai]->dir, nome);
 
             if (idExistente != -1) {
                 if (strcmp(comando, "mkdir") == 0) {
                     printf("mkdir: nao foi possivel criar '%s': O arquivo/diretorio ja existe\n", nome);
                 } else {
                     // touch em algo que já existe -> atualiza timestamp
-                    tabelaInodes[idExistente]->dataModificacao = time(NULL);
-                    tabelaInodes[idExistente]->dataAcesso = time(NULL);
+                    disco->inodes[idExistente]->dataModificacao = time(NULL);
+                    disco->inodes[idExistente]->dataAcesso = time(NULL);
                     printf("touch: datas de '%s' atualizadas.\n", nome);
                 }
             } else {
-                int novoInode = buscarInodeLivre(bitmap);
+                int novoInode = buscarInodeLivre(&disco->bitmapInode);
                 if (novoInode != -1) {
-                    ocuparBitMap(bitmap, novoInode);
+                    ocuparBitMap(&disco->bitmapInode, novoInode);
                 }
                 if (novoInode == -1) {
                     printf("Erro: sem inodes livres!\n");
@@ -155,11 +156,11 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
                 }
                 
                 if (strcmp(comando, "mkdir") == 0)
-                    preencherInode(tabelaInodes[novoInode], DIRETORIO);
+                    preencherInode(disco->inodes[novoInode], DIRETORIO);
                 else
-                    preencherInode(tabelaInodes[novoInode], ARQUIVO);
+                    preencherInode(disco->inodes[novoInode], ARQUIVO);
                 
-                InserirEntrada(tabelaInodes[inodePai]->dir, nome, novoInode);
+                InserirEntrada(disco->inodes[inodePai]->dir, nome, novoInode);
                 printf("'%s' criado com inode [%d]\n", nome, novoInode);
             }
         } else {
@@ -170,26 +171,26 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     else if (strcmp(comando, "ls") == 0) {
         if (argc == 1) {
             // Lista o conteúdo do diretório de contexto atual (inodeCWD)
-            ListaConteudoDiretorio(tabelaInodes[inodeCWD]->dir);
+            ListaConteudoDiretorio(disco->inodes[inodeCWD]->dir);
         } else {
             // Busca o Inode exato do caminho passado por argumento
-            int inodeAlvo = BuscarInodePorCaminho(args[1], inodeCWD, tabelaInodes);
+            int inodeAlvo = BuscarInodePorCaminho(args[1], inodeCWD, disco->inodes);
             if (inodeAlvo == -1) {
                 printf("Diretorio nao encontrado!\n");
                 return 1;
             }
-            if (tabelaInodes[inodeAlvo]->tipo != DIRETORIO) {
+            if (disco->inodes[inodeAlvo]->tipo != DIRETORIO) {
                 printf("Erro: '%s' nao eh um diretorio!\n", args[1]);
                 return 1;
             }
-            ListaConteudoDiretorio(tabelaInodes[inodeAlvo]->dir);
+            ListaConteudoDiretorio(disco->inodes[inodeAlvo]->dir);
         }
     }
     
  else if (strcmp(comando, "rename") == 0) {
         if (argc >= 3) {
             char *caminho = args[1];
-            int inodePai = DiretorioCaminho(caminho, tabelaInodes);
+            int inodePai = DiretorioCaminho(caminho, disco->inodes);
 
             if (inodePai == -1) {
                 printf("erro: caminho invalido!\n");
@@ -200,10 +201,10 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             if (nome == NULL) nome = caminho; else nome++;
             
             // checa se o arquivo/pasta original existe
-            if (BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome) == -1) {
+            if (BuscarInodePorNome(disco->inodes[inodePai]->dir, nome) == -1) {
                 printf("rename: nao foi possivel renomear '%s': n existe\n", nome);
             } else {
-                RenomearEntrada(tabelaInodes[inodePai]->dir, nome, args[2]);
+                RenomearEntrada(disco->inodes[inodePai]->dir, nome, args[2]);
                 printf("'%s' renomeado para '%s'.\n", nome, args[2]);
             }
         } else {
@@ -228,7 +229,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
                 caminho = args[1];
             }
 
-            int inodePai = DiretorioCaminho(caminho, tabelaInodes);
+            int inodePai = DiretorioCaminho(caminho, disco->inodes);
             if (inodePai == -1) {
                 printf("rm: caminho invalido!\n");
                 return 1;
@@ -236,20 +237,20 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
 
             char *nome = strrchr(caminho, '/');
             if (nome == NULL) nome = caminho; else nome++;
-            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome);
+            int idAlvo = BuscarInodePorNome(disco->inodes[inodePai]->dir, nome);
 
             if (idAlvo == -1) {
                 printf("rm: nao foi possivel remover '%s': Arquivo ou diretorio inexistente\n", nome);
             } 
             // bloqueia a remoção de diretórios sem a flag -r
-            else if (tabelaInodes[idAlvo]->tipo == DIRETORIO && flag_r == 0) {
+            else if (disco->inodes[idAlvo]->tipo == DIRETORIO && flag_r == 0) {
                 printf("rm: nao foi possivel remover '%s': E um diretorio (use -r)\n", nome);
             } 
             else {
-                RemoverEntrada(tabelaInodes[inodePai]->dir, nome);
+                RemoverEntrada(disco->inodes[inodePai]->dir, nome);
                 printf("'%s' removido com sucesso.\n", nome);
-                desocuparBitMap(bitmap, idAlvo);
-                liberarInode(tabelaInodes[idAlvo]);
+                desocuparBitMap(&disco->bitmapInode, idAlvo);
+                liberarInode(disco->inodes[idAlvo]);
             }
         } else {
             printf("Erro. Uso: rm [-r] <caminho>\n");
@@ -258,7 +259,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     else if (strcmp(comando, "cat") == 0) {
         if (argc >= 2) {
             char *caminho = args[1];
-            int inodePai = DiretorioCaminho(caminho, tabelaInodes);
+            int inodePai = DiretorioCaminho(caminho, disco->inodes);
 
             if (inodePai == -1) {
                 printf("cat: caminho invalido!\n");
@@ -268,32 +269,17 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             char *nome = strrchr(caminho, '/');
             if (nome == NULL) nome = caminho; else nome++;
 
-            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome);
+            int idAlvo = BuscarInodePorNome(disco->inodes[inodePai]->dir, nome);
 
             if (idAlvo == -1) {
                 printf("cat: %s: Arquivo ou diretorio inexistente\n", nome);
-            } else if (tabelaInodes[idAlvo]->tipo == DIRETORIO) {
+            } else if (disco->inodes[idAlvo]->tipo == DIRETORIO) {
                 printf("cat: %s: E um diretorio!\n", nome);
             } else {
-                iNode *arquivoInode = tabelaInodes[idAlvo];
-                
-                // verifica se o arquivo está vazio
-                if (arquivoInode->tamanhoArquivo == 0 || arquivoInode->blocosOcupados == 0) {
-                    printf("\n");
-                    printf("O arquivo '%s' esta vazio.\n", nome); 
-                } else {
-                    for (int i = 0; i < arquivoInode->blocosOcupados; i++) {
-                        int numBloco = arquivoInode->blocosDiretos[i];
-                    
-                        if (numBloco != BLOCO_INVALIDO && disco[numBloco] != NULL) {
-                            printf("%.*s", disco[numBloco]->bytesUtilizados, disco[numBloco]->dados);
-                        }
-                    }
-                    printf("\n"); 
-                }
-                
+                char * texto = retornaArquivo(disco,sb,idAlvo);
+                printf("%s",texto);
                 // atualiza acesso do inode
-                arquivoInode->dataAcesso = time(NULL);
+                disco->inodes[idAlvo]->dataAcesso = time(NULL);
             }
         } else {
             printf("Erro. Uso: cat <caminho>\n");
@@ -304,9 +290,41 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
         if(texto == NULL){
             printf("Documento Invalido.\n");
             return 1;
-        }else{
-            printf("Escrevendo documento selecionado: '%s'\n", texto);
         }
+        char caminhodoc[100];
+
+        printf("Escreva o caminho do documento em que deseja escrever:");
+
+        fgets(caminhodoc, 100, stdin);
+        caminhodoc[strcspn(caminhodoc, "\n")] = '\0';
+
+        int inodePai = DiretorioCaminho(caminhodoc, disco->inodes);
+
+        if (inodePai == -1) {
+            printf("caminho invalido!\n");
+            return 1;
+        }
+
+        char *nome = strrchr(caminhodoc, '/');
+        if (nome == NULL) nome = caminhodoc; else nome++;
+
+        int idAlvo = BuscarInodePorNome(disco->inodes[inodePai]->dir, nome);
+
+        if (idAlvo == -1) {
+            printf("%s: Arquivo ou diretorio inexistente\n", nome);
+        } else if (disco->inodes[idAlvo]->tipo == DIRETORIO) {
+            printf("%s: Eh um diretorio!\n", nome);
+        } else {
+            printf("Escrevendo documento selecionado: '%s'\n", texto);
+            escreveArquivo(disco,sb,texto,idAlvo);
+        }
+
+
+        
+        
+        
+
+
     }
     else if (strcmp(comando, "mv") == 0) {
         if (argc >= 3) {
@@ -314,7 +332,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             char *destino = args[2];
 
             // verificar origem
-            int inodePaiOrigem = DiretorioCaminho(origem, tabelaInodes);
+            int inodePaiOrigem = DiretorioCaminho(origem, disco->inodes);
             if (inodePaiOrigem == -1) {
                 printf("mv: caminho de origem invalido!\n");
                 return 1;
@@ -324,14 +342,14 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             if (nomeOrigem == NULL) nomeOrigem = origem; else nomeOrigem++;
 
             // Buscar se o arquivo/diretório alvo realmente existe na origem
-            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePaiOrigem]->dir, nomeOrigem);
+            int idAlvo = BuscarInodePorNome(disco->inodes[inodePaiOrigem]->dir, nomeOrigem);
             if (idAlvo == -1) {
                 printf("mv: impossivel mover '%s': Arquivo ou diretorio inexistente\n", nomeOrigem);
                 return 1;
             }
 
             // --- 2. Processar Destino ---
-            int inodePaiDestino = DiretorioCaminho(destino, tabelaInodes);
+            int inodePaiDestino = DiretorioCaminho(destino, disco->inodes);
             if (inodePaiDestino == -1) {
                 printf("mv: caminho de destino invalido!\n");
                 return 1;
@@ -341,19 +359,19 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             if (nomeDestino == NULL) nomeDestino = destino; else nomeDestino++;
 
             // checar se já existe um arquivo com o mesmo nome no destino 
-            if (BuscarInodePorNome(tabelaInodes[inodePaiDestino]->dir, nomeDestino) != -1) {
+            if (BuscarInodePorNome(disco->inodes[inodePaiDestino]->dir, nomeDestino) != -1) {
                 printf("mv: impossivel mover para '%s': O arquivo/diretorio ja existe no destino\n", nomeDestino);
                 return 1;
             }
 
             //movimentação
-            RemoverEntrada(tabelaInodes[inodePaiOrigem]->dir, nomeOrigem);
-            InserirEntrada(tabelaInodes[inodePaiDestino]->dir, nomeDestino, idAlvo);
+            RemoverEntrada(disco->inodes[inodePaiOrigem]->dir, nomeOrigem);
+            InserirEntrada(disco->inodes[inodePaiDestino]->dir, nomeDestino, idAlvo);
 
             // Atualiza os timestamps de acesso
-            tabelaInodes[idAlvo]->dataModificacao = time(NULL);
-            tabelaInodes[inodePaiOrigem]->dataModificacao = time(NULL);
-            tabelaInodes[inodePaiDestino]->dataModificacao = time(NULL);
+            disco->inodes[idAlvo]->dataModificacao = time(NULL);
+            disco->inodes[inodePaiOrigem]->dataModificacao = time(NULL);
+            disco->inodes[inodePaiDestino]->dataModificacao = time(NULL);
 
             printf("'%s' movido com sucesso para '%s'.\n", nomeOrigem, destino);
         } else {
