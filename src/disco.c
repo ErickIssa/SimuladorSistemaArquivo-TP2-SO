@@ -66,7 +66,7 @@ int inicializaDisco(Disco *disco, Superbloco *superBloco) {
 
 int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_inode){
 
-
+    alterarTamanhoArquivo(disco->inodes[id_inode], (int)strlen(texto));
 
     int nBlocos = strlen(texto)/superBloco->tamanho_bloco;
     if(strlen(texto)%superBloco->tamanho_bloco != 0){
