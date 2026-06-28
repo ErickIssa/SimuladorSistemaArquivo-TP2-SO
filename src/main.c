@@ -67,7 +67,7 @@ int tamParticao = 0;
     if (op ==0 ){
         char entrada [100]; 
         while (1){
-            printf("[simulador@aseta]: ");
+            printf("[simulador@VIDENTIX]: ");
             fgets(entrada, 100, stdin);
             if(iniciarInterpretador(entrada,&sb,&disco) == 0){
                 break;

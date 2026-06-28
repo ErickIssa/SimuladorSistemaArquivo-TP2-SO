@@ -361,6 +361,9 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
 
     }
     else if(strcmp(comando, "listarDocSimulados")==0){
+        if(argc<1){
+            printf("Comando incorreto.");
+        }
         listarDocumentos();
     }
     else if (strcmp(comando, "mv") == 0) {
