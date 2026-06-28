@@ -71,8 +71,6 @@ int tamParticao = 0;
             if(iniciarInterpretador(entrada,&sb,&disco) == 0){
                 break;
             }
-            imprimirSuperBloco(&sb);
-            imprimirTodosInodes(disco.inodes);
 
         }
     }else if(op == 1){
