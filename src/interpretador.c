@@ -124,7 +124,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
         printf("rename  - Renomeia um arquivo ou diretorio existente.\n");
         printf("          Uso: rename <caminho/nome_atual> <novo_nome>\n");
         printf("rm      - Remove um arquivo (use -r para remover diretorios).\n");
-        printf("          Uso: rm [-r] <caminho>\n");
+        printf("          Uso: rm -r <caminho>\n");
         printf("cat     - Exibe o conteudo em texto de um arquivo.\n");
         printf("          Uso: cat <caminho>\n");
         printf("escreva - Abre o prompt para escrever texto em um documento.\n");
@@ -307,7 +307,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
                 printf("cat: %s: E um diretorio!\n", nome);
             } else {
                 char * texto = retornaArquivo(disco,sb,idAlvo);
-                printf("%s",texto);
+                printf("%s\n",texto);
                 // atualiza acesso do inode
                 disco->inodes[idAlvo]->dataAcesso = time(NULL);
             }
@@ -316,8 +316,12 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
         }
     }else
     if(strcmp(comando, "escreva")==0){
-        char texto[1000000];
-        strcpy(texto, retornaDocumento(atoi(args[2])));
+        if(argc<3){
+            printf("Comando incorreto.");
+        }
+
+        char *texto = retornaDocumento(atoi(args[2]));
+
         if(texto == NULL){
             printf("Documento Invalido.\n");
             return 1;

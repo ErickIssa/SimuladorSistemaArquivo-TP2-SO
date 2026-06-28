@@ -61,6 +61,7 @@ int tamParticao = 0;
     do{
         printf("0 - Terminal\n1 - Arquivo\n");
         scanf("%d",&op);
+        getchar();
     }while(op != 0 && op != 1);
 
     if (op ==0 ){
