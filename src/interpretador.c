@@ -90,10 +90,10 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     if (strlen(entrada) == 0) return 1;
 
     // quebra a string
-    args[argc] = strtok(entrada, " "); 
+    args[argc] = strtok(entrada, " \n\r"); 
     while (args[argc] != NULL && argc < MAX_ARGS - 1) {
         argc++;
-        args[argc] = strtok(NULL, " ");
+        args[argc] = strtok(NULL, " \n\r");
     }
 
     if (argc == 0 || args[0] == NULL) return 1;
