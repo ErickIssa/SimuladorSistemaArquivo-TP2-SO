@@ -11,5 +11,6 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
 int DiretorioCaminho(char *caminho,iNode **tabelaInodes);
 void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco);
 int BuscarInodePorNome(Diretorio *d, char *nome);
+int BuscarInodePorCaminho(char *caminho, int inodeAtual, iNode **tabelaInodes);
 
 #endif
