@@ -1,6 +1,11 @@
-5
+10
 mkdir teste
 touch /teste/arquivo.txt
 ls
 touch arq2.txt
-ls /teste
+escreva arq2.txt 1
+cat arq2.txt
+cat arq2.txt
+touch arq3.txt
+escreva arq3.txt 4
+cat arq3.txt

@@ -158,21 +158,3 @@ char * retornaBloco(Disco * disco, int id_bloco){
     return disco->blocos[id_bloco]->dados;
 
 }
-int escreveBlocoEnderecoIndireto(Disco* disco, Superbloco superBloco, char * texto, int * id){
-    if(superBloco.blocos_livres <= 0){
-        return DISCO_LOTADO;
-    }
-    if((int)strlen(texto)> superBloco.tamanho_bloco){
-        return TEXTO_NAO_CABE_NO_BLOCO;
-    }
-    for(int i = 0; i< superBloco.total_blocos;i++){
-        if(disco->bitmap[i] == 1){
-            continue;
-        }
-        disco->bitmap[i] = 1;
-        insereBlocoDados(disco->blocos[i],texto);
-        *id = i;
-        return SUCESSO;
-    }
-    return FALHOU;
-}

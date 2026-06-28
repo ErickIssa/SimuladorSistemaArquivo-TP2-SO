@@ -1,4 +1,4 @@
-3
+4
 arq10.txt
 arq100.txt
 arq4096.txt

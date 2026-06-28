@@ -106,7 +106,35 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
     if (strcmp(comando, "exit") == 0 || strcmp(comando, "quit") == 0) {
         printf("saindo do simulador\n");
         return 0; 
-    } 
+    }
+
+    else if (strcmp(comando, "help") == 0) {
+        printf("\n=== Lista de Comandos ===\n");
+        printf("help    - Mostra esta mensagem de ajuda.\n");
+        printf("exit    - Sai do simulador.\n");
+        printf("quit    - Sai do simulador (mesmo que exit).\n");
+        printf("init    - Inicializa o sistema de arquivos.\n");
+        printf("          Uso: init <tamanho_particao> <tamanho_bloco>\n");
+        printf("mkdir   - Cria um novo diretorio.\n");
+        printf("          Uso: mkdir <caminho>\n");
+        printf("touch   - Cria um arquivo vazio ou atualiza as datas de um existente.\n");
+        printf("          Uso: touch <caminho>\n");
+        printf("ls      - Lista o conteudo do diretorio atual ou do caminho especificado.\n");
+        printf("          Uso: ls [caminho]\n");
+        printf("rename  - Renomeia um arquivo ou diretorio existente.\n");
+        printf("          Uso: rename <caminho/nome_atual> <novo_nome>\n");
+        printf("rm      - Remove um arquivo (use -r para remover diretorios).\n");
+        printf("          Uso: rm [-r] <caminho>\n");
+        printf("cat     - Exibe o conteudo em texto de um arquivo.\n");
+        printf("          Uso: cat <caminho>\n");
+        printf("escreva - Abre o prompt para escrever texto em um documento.\n");
+        printf("          Uso: escreva <caminho> <indice do documento>\n");
+        printf("mv      - Move um arquivo/diretorio de um lugar para outro.\n");
+        printf("          Uso: mv <caminho_origem> <caminho_destino>\n");
+        printf("listarDocSimulados     - Lista documentos que podem ser utilizados para serem escritos no disco.\n");
+        printf("          Uso: listarDocSimulados\n");
+        printf("=========================\n\n");
+    }
     
     else if (strcmp(comando, "init") == 0) {
         if (argc >= 3) {
@@ -288,27 +316,27 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
         }
     }else
     if(strcmp(comando, "escreva")==0){
-        char *texto = selecionaRetornaDocumento();
+        char texto[1000000];
+        strcpy(texto, retornaDocumento(atoi(args[2])));
         if(texto == NULL){
             printf("Documento Invalido.\n");
             return 1;
         }
-        char caminhodoc[100];
 
-        printf("Escreva o caminho do documento em que deseja escrever:");
+        // printf("Escreva o caminho do documento em que deseja escrever:");
 
-        fgets(caminhodoc, 100, stdin);
-        caminhodoc[strcspn(caminhodoc, "\n")] = '\0';
+        // fgets(caminhodoc, 100, stdin);
+        // caminhodoc[strcspn(caminhodoc, "\n")] = '\0';
 
-        int inodePai = DiretorioCaminho(caminhodoc, disco->inodes);
+        int inodePai = DiretorioCaminho(args[1], disco->inodes);
 
         if (inodePai == -1) {
             printf("caminho invalido!\n");
             return 1;
         }
 
-        char *nome = strrchr(caminhodoc, '/');
-        if (nome == NULL) nome = caminhodoc; else nome++;
+        char *nome = strrchr(args[1], '/');
+        if (nome == NULL) nome = args[1]; else nome++;
 
         int idAlvo = BuscarInodePorNome(disco->inodes[inodePai]->dir, nome);
 
@@ -327,6 +355,9 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, Disco * disco) {
         
 
 
+    }
+    else if(strcmp(comando, "listarDocSimulados")==0){
+        listarDocumentos();
     }
     else if (strcmp(comando, "mv") == 0) {
         if (argc >= 3) {
