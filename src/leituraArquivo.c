@@ -198,9 +198,27 @@ char* retornaDocumento(int id) {
 }
 
 char* selecionaRetornaDocumento(){
-    int id;
-    listarDocumentos();
-    printf("Digite o ID do documento que deseja acessar: ");
-    scanf("%d", &id);
-    return retornaDocumento(id);
+
+    int comando = -1;
+
+    printf("Digite (1) para leitura por terminal e (2) para leitura por arquivo: ");
+    scanf("%d", &comando);
+
+    if (comando == 1) {
+        char entrada[1000];
+        printf("Digite o texto que deseja escrever(tamanho máximo 1000): ");
+        getchar(); // Limpa o buffer do teclado
+        fgets(entrada, sizeof(entrada), stdin);
+        entrada[strcspn(entrada, "\n")] = 0; // Remove o '\n' do final da string
+        return strdup(entrada); // Retorna uma cópia da string digitada
+    } else if (comando == 2) {
+        int id;
+        listarDocumentos();
+        printf("Digite o ID do documento que deseja acessar: ");
+        scanf("%d", &id);
+        return retornaDocumento(id);
+    } else {
+        printf("Comando inválido. Retornando NULL.\n");
+        return NULL;
+    }
 }
