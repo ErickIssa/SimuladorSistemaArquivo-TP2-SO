@@ -65,11 +65,6 @@ int inicializaDisco(Disco *disco, Superbloco *superBloco) {
 
 int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_inode){
 
-    liberarInode(disco->inodes[id_inode]);
-    disco->bitmapInode.bitmap[id_inode] = 1;
-    preencherInode(disco->inodes[id_inode], ARQUIVO);
-    alterarTamanhoArquivo(disco->inodes[id_inode], strlen(texto));
-    superBloco->inodes_livres--;
 
 
     int nBlocos = strlen(texto)/superBloco->tamanho_bloco;
@@ -140,7 +135,9 @@ int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
 
 char * retornaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
 
-
+    if(disco->inodes[id_inode]->blocosOcupados == 0){
+        return "Arquivo Vazio!!!\n";
+    }
 
     char * texto;
     texto = (char *)malloc(sizeof(char)*disco->inodes[id_inode]->blocosOcupados* superBloco->tamanho_bloco);

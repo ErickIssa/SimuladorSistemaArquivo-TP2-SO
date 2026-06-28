@@ -216,6 +216,7 @@ char* selecionaRetornaDocumento(){
         listarDocumentos();
         printf("Digite o ID do documento que deseja acessar: ");
         scanf("%d", &id);
+        getchar();
         return retornaDocumento(id);
     } else {
         printf("Comando inválido. Retornando NULL.\n");
