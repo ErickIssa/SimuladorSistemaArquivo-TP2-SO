@@ -12,6 +12,8 @@
 
 #define MAX_INPUT 256
 #define MAX_ARGS 10
+//inode raiz
+static int inodeCWD = 0;
 
 //criar um diretorio raiz Inicial automaticamente
 //Para isso criar um Inode passando TipoInode=DIRETORIO, que contenha o Inode 0
@@ -167,14 +169,20 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     
     else if (strcmp(comando, "ls") == 0) {
         if (argc == 1) {
-            ListaConteudoDiretorio(tabelaInodes[0]->dir);
+            // Lista o conteúdo do diretório de contexto atual (inodeCWD)
+            ListaConteudoDiretorio(tabelaInodes[inodeCWD]->dir);
         } else {
-            int inode = DiretorioCaminho(args[1], tabelaInodes);
-            if (inode == -1) {
+            // Busca o Inode exato do caminho passado por argumento
+            int inodeAlvo = BuscarInodePorCaminho(args[1], inodeCWD, tabelaInodes);
+            if (inodeAlvo == -1) {
                 printf("Diretorio nao encontrado!\n");
                 return 1;
             }
-            ListaConteudoDiretorio(tabelaInodes[inode]->dir);
+            if (tabelaInodes[inodeAlvo]->tipo != DIRETORIO) {
+                printf("Erro: '%s' nao eh um diretorio!\n", args[1]);
+                return 1;
+            }
+            ListaConteudoDiretorio(tabelaInodes[inodeAlvo]->dir);
         }
     }
     
@@ -267,8 +275,25 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             } else if (tabelaInodes[idAlvo]->tipo == DIRETORIO) {
                 printf("cat: %s: E um diretorio!\n", nome);
             } else {
-                // espaço pra leitura de blocos
-                printf("[Aviso] Lendo arquivo inode [%d]. Back-end de blocos pendente.\n", idAlvo);
+                iNode *arquivoInode = tabelaInodes[idAlvo];
+                
+                // verifica se o arquivo está vazio
+                if (arquivoInode->tamanhoArquivo == 0 || arquivoInode->blocosOcupados == 0) {
+                    printf("\n");
+                    printf("O arquivo '%s' esta vazio.\n", nome); 
+                } else {
+                    for (int i = 0; i < arquivoInode->blocosOcupados; i++) {
+                        int numBloco = arquivoInode->blocosDiretos[i];
+                    
+                        if (numBloco != BLOCO_INVALIDO && disco[numBloco] != NULL) {
+                            printf("%.*s", disco[numBloco]->bytesUtilizados, disco[numBloco]->dados);
+                        }
+                    }
+                    printf("\n"); 
+                }
+                
+                // atualiza acesso do inode
+                arquivoInode->dataAcesso = time(NULL);
             }
         } else {
             printf("Erro. Uso: cat <caminho>\n");
@@ -283,7 +308,58 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             printf("Escrevendo documento selecionado: '%s'\n", texto);
         }
     }
-    else {
+    else if (strcmp(comando, "mv") == 0) {
+        if (argc >= 3) {
+            char *origem = args[1];
+            char *destino = args[2];
+
+            // verificar origem
+            int inodePaiOrigem = DiretorioCaminho(origem, tabelaInodes);
+            if (inodePaiOrigem == -1) {
+                printf("mv: caminho de origem invalido!\n");
+                return 1;
+            }
+
+            char *nomeOrigem = strrchr(origem, '/');
+            if (nomeOrigem == NULL) nomeOrigem = origem; else nomeOrigem++;
+
+            // Buscar se o arquivo/diretório alvo realmente existe na origem
+            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePaiOrigem]->dir, nomeOrigem);
+            if (idAlvo == -1) {
+                printf("mv: impossivel mover '%s': Arquivo ou diretorio inexistente\n", nomeOrigem);
+                return 1;
+            }
+
+            // --- 2. Processar Destino ---
+            int inodePaiDestino = DiretorioCaminho(destino, tabelaInodes);
+            if (inodePaiDestino == -1) {
+                printf("mv: caminho de destino invalido!\n");
+                return 1;
+            }
+
+            char *nomeDestino = strrchr(destino, '/');
+            if (nomeDestino == NULL) nomeDestino = destino; else nomeDestino++;
+
+            // checar se já existe um arquivo com o mesmo nome no destino 
+            if (BuscarInodePorNome(tabelaInodes[inodePaiDestino]->dir, nomeDestino) != -1) {
+                printf("mv: impossivel mover para '%s': O arquivo/diretorio ja existe no destino\n", nomeDestino);
+                return 1;
+            }
+
+            //movimentação
+            RemoverEntrada(tabelaInodes[inodePaiOrigem]->dir, nomeOrigem);
+            InserirEntrada(tabelaInodes[inodePaiDestino]->dir, nomeDestino, idAlvo);
+
+            // Atualiza os timestamps de acesso
+            tabelaInodes[idAlvo]->dataModificacao = time(NULL);
+            tabelaInodes[inodePaiOrigem]->dataModificacao = time(NULL);
+            tabelaInodes[inodePaiDestino]->dataModificacao = time(NULL);
+
+            printf("'%s' movido com sucesso para '%s'.\n", nomeOrigem, destino);
+        } else {
+            printf("Erro. Uso: mv <caminho_origem> <caminho_destino>\n");
+        }
+    } else {
         printf("comando nao reconhecido: '%s'\n", comando);
     }
 
@@ -335,4 +411,32 @@ int DiretorioCaminho(char *caminho, iNode **tabelaInodes)
     }
 
     return inodeAtual;
+}
+
+int BuscarInodePorCaminho(char *caminho, int inodeAtual, iNode **tabelaInodes) {
+    if (strcmp(caminho, "/") == 0) {
+        return 0; // se o caminho for apenas / retorna a raiz
+    }
+
+    char copia[100];
+    strcpy(copia, caminho);
+
+    int atual = (caminho[0] == '/') ? 0 : inodeAtual;
+
+    char *token = strtok(copia, "/");
+    while (token != NULL) {
+        if (tabelaInodes[atual]->tipo != DIRETORIO) {
+            return -1; // n valido
+        }
+
+        int proximo = BuscarInodePorNome(tabelaInodes[atual]->dir, token);
+        if (proximo == -1) {
+            return -1; 
+        }
+
+        atual = proximo;
+        token = strtok(NULL, "/");
+    }
+
+    return atual;
 }
