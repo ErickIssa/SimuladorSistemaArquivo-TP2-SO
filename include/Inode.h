@@ -7,6 +7,7 @@
 
 #include <time.h>
 #include "Diretorio.h"
+#include "bitMapInode.h"
 
 typedef enum{
     ARQUIVO,
@@ -39,5 +40,7 @@ void liberarInode(iNode *inode);
 int adicionarBloco(iNode *inode, int enderecoBloco);
 int removerBloco(iNode *inode);
 void alterarTamanhoArquivo(iNode *inode, int bytesAlterados);
+void imprimirInode(iNode *inode);
+void imprimirTodosInodes(iNode **inodes);
 
 #endif

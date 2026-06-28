@@ -7,9 +7,9 @@
 #include "Inode.h"
 #include "bloco.h"
 
-int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[], BlocoDados *disco);
-int DiretorioCaminho(char *caminho,iNode tabelaInodes[]);
-void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[], BlocoDados *disco);
+int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco);
+int DiretorioCaminho(char *caminho,iNode **tabelaInodes);
+void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco);
 int BuscarInodePorNome(Diretorio *d, char *nome);
 
 #endif

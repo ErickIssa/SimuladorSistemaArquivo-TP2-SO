@@ -39,3 +39,16 @@ int buscarInodeLivre(bitmapInode *bitmap) {
     return -1;
 }
 
+void imprimirBitmapInodes(bitmapInode *bitmap) {
+    if (bitmap == NULL) {
+        printf("Bitmap de inodes inexistente.\n");
+        return;
+    }
+
+    printf("Bitmap de Inodes:\n");
+
+    for (int i = 0; i < 10; i++) {
+        printf("[%2d] = %d\n", i, bitmap->bitmap[i]);
+    }
+}
+

@@ -6,35 +6,59 @@
 
 #define N_INODES 256
  
-int inicializaDisco(Disco * disco, Superbloco * superBloco, iNode * root){
+int inicializaDisco(Disco *disco, Superbloco *superBloco) {
 
-    if(superBloco == NULL){
+    if (superBloco == NULL)
         return INFORMACOES_AUSENTES;
-    }
-    if(!InformacoesSaoValidas(superBloco)){
+
+    if (!InformacoesSaoValidas(superBloco))
         return INFORMACOES_INVALIDAS;
-    }
 
     inicializarBitmapInodes(&disco->bitmapInode);
 
-    disco->bitmap = (int*)malloc(sizeof(int)*superBloco->total_blocos);
-    disco->blocos = (BlocoDados **)malloc(sizeof(BlocoDados)*superBloco->total_blocos);
-    
-    if(disco->bitmap == NULL){
+    // Bitmap
+    disco->bitmap = malloc(sizeof(int) * superBloco->total_blocos);
+    if (disco->bitmap == NULL)
         return ERRO_MEMORIA;
-    }else{
-        for(int i = 0; i < superBloco->total_blocos; i++){
-            disco->bitmap[i] = 0;
-            inicializaBlocoDados(disco->blocos[i], superBloco->tamanho_bloco);
-        }
+
+    // Vetor de ponteiros para blocos
+    disco->blocos = malloc(sizeof(BlocoDados *) * superBloco->total_blocos);
+    if (disco->blocos == NULL)
+        return ERRO_MEMORIA;
+
+    for (int i = 0; i < superBloco->total_blocos; i++) {
+
+        disco->bitmap[i] = 0;
+
+        disco->blocos[i] = malloc(sizeof(BlocoDados));
+        if (disco->blocos[i] == NULL)
+            return ERRO_MEMORIA;
+
+        inicializaBlocoDados(disco->blocos[i], superBloco->tamanho_bloco);
     }
 
-    
-    disco->inodes = (iNode **)malloc(sizeof(iNode)*N_INODES);
-    for(int i = 1; i < N_INODES; i++){
+    // Vetor de ponteiros para inodes
+    disco->inodes = malloc(sizeof(iNode *) * N_INODES);
+    if (disco->inodes == NULL)
+        return ERRO_MEMORIA;
+
+    disco->inodes[0] = malloc(sizeof(iNode));
+    if (disco->inodes[0] == NULL)
+        return ERRO_MEMORIA;
+
+    // Inicializa o inode raiz
+    inicializarInodeRaiz(disco->inodes[0], 0);
+    ocuparBitMap(&disco->bitmapInode, 0);
+
+    // Demais inodes
+    for (int i = 1; i < N_INODES; i++) {
+
+        disco->inodes[i] = malloc(sizeof(iNode));
+        if (disco->inodes[i] == NULL)
+            return ERRO_MEMORIA;
+
         inicializarInode(disco->inodes[i], i);
     }
-    disco->inodes[0] = root;
 
     return SUCESSO;
 }
@@ -107,7 +131,6 @@ int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode){
         int index = disco->inodes[id_inode]->blocosDiretos[i];
         disco->bitmap[index] = 0;
     }
-
 
     disco->bitmapInode.bitmap[id_inode] = 0;
 

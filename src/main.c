@@ -30,9 +30,7 @@
 
 int main()
 {
-    Superbloco sb;
-    iNode raiz;
-    inicializarInodeRaiz (&raiz, 0);
+    Superbloco sb;    
 
     printf("Sistema iniciado!\n");
 int tamParticao = 0;
@@ -51,7 +49,7 @@ int tamParticao = 0;
 
     //Cria o disco
     Disco disco;
-    inicializaDisco(&disco, &sb, &raiz);
+    inicializaDisco(&disco, &sb);
 
     printf("Particao criada com sucesso! UHUL\n");
 
@@ -70,12 +68,14 @@ int tamParticao = 0;
         while (1){
             printf("[simulador@aseta]: ");
             fgets(entrada, 100, stdin);
-            if(iniciarInterpretador(entrada,&sb,&(disco.bitmapInode),*disco.inodes, *disco.blocos) == 0){
+            if(iniciarInterpretador(entrada,&sb,&(disco.bitmapInode),disco.inodes, disco.blocos) == 0){
                 break;
             }
+            //imprimirBitmapInodes(&disco.bitmapInode);
+            //imprimirTodosInodes(disco.inodes);
         }
     }else if(op == 1){
-        lerComandosArquivo("in/comandos.txt", &sb, &(disco.bitmapInode), *disco.inodes, *disco.blocos);
+        lerComandosArquivo("in/comandos.txt", &sb, &(disco.bitmapInode), disco.inodes, disco.blocos);
         //printf("ELAO");
     }
     return 0;

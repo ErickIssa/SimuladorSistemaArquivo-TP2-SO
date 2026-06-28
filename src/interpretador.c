@@ -17,7 +17,7 @@
 //Para isso criar um Inode passando TipoInode=DIRETORIO, que contenha o Inode 0
 //PreecherInode cria um diretorio já
 //venho do main ja sabendo que tenho um diretorio raiz(IDnode 0)
-void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[], BlocoDados *disco) {
+void lerComandosArquivo(const char *caminhoArquivo, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco) {
     FILE *arquivo = fopen(caminhoArquivo, "r");
     
     if (arquivo == NULL) {
@@ -82,7 +82,7 @@ int BuscarInodePorNome(Diretorio *d, char *nome) {
     return -1; // Não encontrou
 }
 
-int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode tabelaInodes[], BlocoDados *disco) {
+int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNode **tabelaInodes, BlocoDados **disco) {
     char *args[MAX_ARGS];
     int argc = 0;
 
@@ -131,15 +131,15 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             char *nome = strrchr(caminho, '/');
             if (nome == NULL) nome = caminho; else nome++;
 
-            int idExistente = BuscarInodePorNome(tabelaInodes[inodePai].dir, nome);
+            int idExistente = BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome);
 
             if (idExistente != -1) {
                 if (strcmp(comando, "mkdir") == 0) {
                     printf("mkdir: nao foi possivel criar '%s': O arquivo/diretorio ja existe\n", nome);
                 } else {
                     // touch em algo que já existe -> atualiza timestamp
-                    tabelaInodes[idExistente].dataModificacao = time(NULL);
-                    tabelaInodes[idExistente].dataAcesso = time(NULL);
+                    tabelaInodes[idExistente]->dataModificacao = time(NULL);
+                    tabelaInodes[idExistente]->dataAcesso = time(NULL);
                     printf("touch: datas de '%s' atualizadas.\n", nome);
                 }
             } else {
@@ -153,11 +153,11 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
                 }
                 
                 if (strcmp(comando, "mkdir") == 0)
-                    preencherInode(&tabelaInodes[novoInode], DIRETORIO);
+                    preencherInode(tabelaInodes[novoInode], DIRETORIO);
                 else
-                    preencherInode(&tabelaInodes[novoInode], ARQUIVO);
+                    preencherInode(tabelaInodes[novoInode], ARQUIVO);
                 
-                InserirEntrada(tabelaInodes[inodePai].dir, nome, novoInode);
+                InserirEntrada(tabelaInodes[inodePai]->dir, nome, novoInode);
                 printf("'%s' criado com inode [%d]\n", nome, novoInode);
             }
         } else {
@@ -167,14 +167,14 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     
     else if (strcmp(comando, "ls") == 0) {
         if (argc == 1) {
-            ListaConteudoDiretorio(tabelaInodes[0].dir);
+            ListaConteudoDiretorio(tabelaInodes[0]->dir);
         } else {
             int inode = DiretorioCaminho(args[1], tabelaInodes);
             if (inode == -1) {
                 printf("Diretorio nao encontrado!\n");
                 return 1;
             }
-            ListaConteudoDiretorio(tabelaInodes[inode].dir);
+            ListaConteudoDiretorio(tabelaInodes[inode]->dir);
         }
     }
     
@@ -192,10 +192,10 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             if (nome == NULL) nome = caminho; else nome++;
             
             // checa se o arquivo/pasta original existe
-            if (BuscarInodePorNome(tabelaInodes[inodePai].dir, nome) == -1) {
+            if (BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome) == -1) {
                 printf("rename: nao foi possivel renomear '%s': n existe\n", nome);
             } else {
-                RenomearEntrada(tabelaInodes[inodePai].dir, nome, args[2]);
+                RenomearEntrada(tabelaInodes[inodePai]->dir, nome, args[2]);
                 printf("'%s' renomeado para '%s'.\n", nome, args[2]);
             }
         } else {
@@ -228,20 +228,20 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
 
             char *nome = strrchr(caminho, '/');
             if (nome == NULL) nome = caminho; else nome++;
-            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePai].dir, nome);
+            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome);
 
             if (idAlvo == -1) {
                 printf("rm: nao foi possivel remover '%s': Arquivo ou diretorio inexistente\n", nome);
             } 
             // bloqueia a remoção de diretórios sem a flag -r
-            else if (tabelaInodes[idAlvo].tipo == DIRETORIO && flag_r == 0) {
+            else if (tabelaInodes[idAlvo]->tipo == DIRETORIO && flag_r == 0) {
                 printf("rm: nao foi possivel remover '%s': E um diretorio (use -r)\n", nome);
             } 
             else {
-                RemoverEntrada(tabelaInodes[inodePai].dir, nome);
+                RemoverEntrada(tabelaInodes[inodePai]->dir, nome);
                 printf("'%s' removido com sucesso.\n", nome);
                 desocuparBitMap(bitmap, idAlvo);
-                liberarInode(&tabelaInodes[idAlvo]);
+                liberarInode(tabelaInodes[idAlvo]);
             }
         } else {
             printf("Erro. Uso: rm [-r] <caminho>\n");
@@ -260,11 +260,11 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
             char *nome = strrchr(caminho, '/');
             if (nome == NULL) nome = caminho; else nome++;
 
-            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePai].dir, nome);
+            int idAlvo = BuscarInodePorNome(tabelaInodes[inodePai]->dir, nome);
 
             if (idAlvo == -1) {
                 printf("cat: %s: Arquivo ou diretorio inexistente\n", nome);
-            } else if (tabelaInodes[idAlvo].tipo == DIRETORIO) {
+            } else if (tabelaInodes[idAlvo]->tipo == DIRETORIO) {
                 printf("cat: %s: E um diretorio!\n", nome);
             } else {
                 // espaço pra leitura de blocos
@@ -285,7 +285,7 @@ int iniciarInterpretador(char *entrada, Superbloco *sb, bitmapInode *bitmap, iNo
     return 1; 
 }
 
-int DiretorioCaminho(char *caminho, iNode tabelaInodes[])
+int DiretorioCaminho(char *caminho, iNode **tabelaInodes)
 {
     char copia[100];
     strcpy(copia,caminho);
@@ -303,7 +303,7 @@ int DiretorioCaminho(char *caminho, iNode tabelaInodes[])
 
     while(token!=NULL)
     {
-        iNode *inode=&tabelaInodes[inodeAtual];
+        iNode *inode=tabelaInodes[inodeAtual];
 
         if(inode->tipo!=DIRETORIO)
             return -1;

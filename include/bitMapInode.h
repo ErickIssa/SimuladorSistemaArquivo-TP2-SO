@@ -14,5 +14,6 @@ int idInodeValido(int idInode);
 int ocuparBitMap(bitmapInode *bitmap, int idInode);
 int desocuparBitMap(bitmapInode *bitmap, int idInode);
 int buscarInodeLivre(bitmapInode *bitmap);
+void imprimirBitmapInodes(bitmapInode *bitmap);
 
 #endif

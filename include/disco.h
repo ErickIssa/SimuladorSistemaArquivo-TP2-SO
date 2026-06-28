@@ -27,7 +27,7 @@ typedef struct disco
 }Disco;
 
 
-int inicializaDisco(Disco * disco, Superbloco * superBloco, iNode * root);
+int inicializaDisco(Disco * disco, Superbloco * superBloco);
 int InformacoesSaoValidas(Superbloco * Superbloco);
 int escreveArquivo(Disco * disco, Superbloco * superBloco, char * texto, int id_inode);
 int apagaArquivo(Disco * disco, Superbloco * superBloco, int id_inode);

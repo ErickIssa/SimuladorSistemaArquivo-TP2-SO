@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <stdio.h>
+#include <time.h>
+
 
 void inicializarInodeRaiz(iNode *inode, int id) {
     inicializarInode(inode, id);
@@ -131,3 +134,53 @@ void alterarTamanhoArquivo(iNode *inode, int bytesAlterados) {
     inode->dataAcesso = time(NULL);
 }
 
+void imprimirInode(iNode *inode) {
+    if (inode == NULL) {
+        printf("Inode inexistente.\n");
+        return;
+    }
+
+    printf("===== INODE %d =====\n", inode->idInode);
+    printf("Em uso: %s\n", inode->emUso ? "Sim" : "Nao");
+
+    switch (inode->tipo) {
+        case ARQUIVO:
+            printf("Tipo: Arquivo\n");
+            break;
+        case DIRETORIO:
+            printf("Tipo: Diretorio\n");
+            break;
+        default:
+            printf("Tipo: Indefinido\n");
+            break;
+    }
+
+    printf("Tamanho do arquivo: %d bytes\n", inode->tamanhoArquivo);
+    printf("Blocos ocupados: %d\n", inode->blocosOcupados);
+
+    printf("Blocos diretos: ");
+    for (int i = 0; i < NUM_BLOCOS_DIRETOS; i++) {
+        printf("%d ", inode->blocosDiretos[i]);
+    }
+    printf("\n");
+
+    printf("Bloco indireto: %d\n", inode->blocoIndireto);
+
+    printf("Data de criacao     : %s", ctime(&inode->dataCriacao));
+    printf("Data de modificacao : %s", ctime(&inode->dataModificacao));
+    printf("Data de acesso      : %s", ctime(&inode->dataAcesso));
+
+    printf("====================\n");
+}
+
+void imprimirTodosInodes(iNode **inodes) {
+    if (inodes == NULL)
+        return;
+
+    for (int i = 0; i < NUM_INODES; i++) {
+        if (inodes[i] != NULL && inodes[i]->emUso) {
+            imprimirInode(inodes[i]);
+            printf("\n");
+        }
+    }
+}
